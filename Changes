@@ -1,0 +1,6 @@
+Revision history for Perl extension WebService::MusicBrainz.
+
+0.01  Mon Apr 24 23:43:14 2006
+	- original version; created by h2xs 1.23 with options
+		-AXn WebService::MusicBrainz
+
