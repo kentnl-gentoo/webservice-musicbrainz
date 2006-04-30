@@ -4,3 +4,10 @@ Revision history for Perl extension WebService::MusicBrainz.
 	- original version; created by h2xs 1.23 with options
 		-AXn WebService::MusicBrainz
 
+0.02  Thu Apr 27 2006
+        - Improved documentation
+	- Removed debug print statement
+	- Added factory object WebService::MusicBrainz
+	- Improved test cases, added Factory.t test script
+	- include META.yml which was missing originally
+	- Remove .swp file accidentally left in distribution

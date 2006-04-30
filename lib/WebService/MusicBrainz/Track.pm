@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Track;
 use strict;
 use WebService::MusicBrainz::Query;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 NAME
 
@@ -16,6 +16,12 @@ WebService::MusicBrainz::Track
     my $ws = WebService::MusicBrainz::Track->new();
     
     my $response = $ws->search({ TITLE => 'Same in any language' });
+
+    my $track = $response->track(); # grab the first one from list
+
+    print $track->title(), " - ", $track->artist()->name(), "\n";
+
+    # OUTPUT: Same In Any Language - I Nine
 
 =head1 DESCRIPTION
 

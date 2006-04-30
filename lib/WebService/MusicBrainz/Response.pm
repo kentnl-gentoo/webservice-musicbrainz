@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Response;
 use strict;
 use XML::Twig;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 NAME
 
@@ -73,7 +73,7 @@ sub as_xml {
 
 =head2 _init()
 
-This method will initialize the WebService::MusicBrainz::Response object and parse the XML response.
+This method will parse the XML response and act as a factory to generate the collection of WebService::MusicBrainz::Response::* objects that represent the XML data.
 
 =cut
 
@@ -327,6 +327,14 @@ sub _create_release {
         if $xRelease->first_child('text-representation') && $xRelease->first_child('text-representation')->att('script');
    $release->asin( $xRelease->first_child('asin')->text() ) if $xRelease->first_child('asin');
 
+   my $xArtist = $xRelease->first_child('artist');
+
+   if(defined($xArtist)) {
+       my $artist = _create_artist($xArtist);
+
+       $release->artist($artist);
+   }
+
    return $release;
 }
 
@@ -347,6 +355,24 @@ sub _create_track {
    $track->id( $xTrack->att('id') ) if $xTrack->att('id');
    $track->title( $xTrack->first_child('title')->text() ) if $xTrack->first_child('title');
    $track->duration( $xTrack->first_child('duration')->text() ) if $xTrack->first_child('duration');
+
+   my $xArtist = $xTrack->first_child('artist');
+
+   if(defined($xArtist)) {
+       my $artist = _create_artist($xArtist);
+
+       $track->artist($artist);
+   }
+
+   my @release_list;
+
+   foreach my $xRelease ($xTrack->get_xpath('release-list/release')) {
+       my $release = _create_release($xRelease);
+
+       push @release_list, $release;
+   }
+
+   $track->release_list(\@release_list);
 
    return $track;
 }

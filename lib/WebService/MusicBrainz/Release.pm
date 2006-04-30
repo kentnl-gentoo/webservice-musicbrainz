@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Release;
 use strict;
 use WebService::MusicBrainz::Query;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 NAME
 
@@ -13,9 +13,15 @@ WebService::MusicBrainz::Release
 
     use WebService::MusicBrainz::Release;
     
-    my $ws = WebService::MusicBrainz::Release-new();
+    my $ws = WebService::MusicBrainz::Release->new();
     
     my $response = $ws->search({ TITLE => 'ok computer' });
+
+    my $release = $response->release(); # grab first one in the list
+
+    print $release->title(), " (", $release->type(), ") - ", $release->artist()->name(), "\n";
+
+    # OUTPUT: OK Computer (Album Official) - Radiohead
 
 =head1 DESCRIPTION
 

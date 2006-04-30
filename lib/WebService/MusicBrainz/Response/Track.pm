@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Response::Track;
 use strict;
 use base 'Class::Accessor';
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 NAME
 
@@ -14,6 +14,24 @@ WebService::MusicBrainz::Response::Track
 =head1 DESCRIPTION
 
 =head1 METHODS
+
+All the methods listed below are accessor methods.  They can take a scalar argument to set the state of the object or without and argument, they will return that state if it is available.
+
+=head2 id()
+
+=head2 title()
+
+=head2 duration()
+
+=head2 artist()
+
+=head2 release_list()
+
+=head2 puid_list()
+
+=head2 relation_list()
+
+=head2 extension()
 
 =cut
 

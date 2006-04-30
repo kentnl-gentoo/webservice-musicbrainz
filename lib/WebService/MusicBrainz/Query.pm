@@ -4,7 +4,7 @@ use strict;
 use LWP::UserAgent;
 use WebService::MusicBrainz::Response;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 NAME
 
@@ -108,7 +108,7 @@ sub _url {
       $url .= '&' . lc($key) . '=' . $params->{$key} unless lc($key) eq "mbid";
    }
       
-   print "URL: $url\n";
+   # print "URL: $url\n";
 
    return $url;
 }
