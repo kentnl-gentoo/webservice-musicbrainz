@@ -86,7 +86,7 @@ ok( $artist_inc_artist_rels, 'get artist reponse object' );
 
 ok( $artist_inc_artist_rels->name() eq "Metallica", 'check artist name' );
 ok( $artist_inc_artist_rels->sort_name() eq "Metallica", 'check artist sort name' );
-ok( $artist_inc_artist_rels->life_span_begin() eq "1981", 'check artist life span begin' );
+ok( $artist_inc_artist_rels->life_span_begin() eq "1981-10", 'check artist life span begin' );
 
 my $artist_inc_relation_list = $artist_inc_artist_rels->relation_list();
 ok( $artist_inc_relation_list, 'get artist relation list' );

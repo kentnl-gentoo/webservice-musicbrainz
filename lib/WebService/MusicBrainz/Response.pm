@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Response;
 use strict;
 use XML::Twig;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 =head1 NAME
 
@@ -334,6 +334,18 @@ sub _create_release {
 
        $release->artist($artist);
    }
+
+   my @track_list;
+
+   if ($xRelease->first_child('track-list')) {
+
+      foreach my $xTrack ($xRelease->get_xpath('track-list/track')) {
+          my $track = _create_track( $xTrack );
+          push @track_list, $track;
+      }
+   }
+
+   $release->track_list(\@track_list);
 
    return $release;
 }

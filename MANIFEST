@@ -13,9 +13,9 @@ lib/WebService/MusicBrainz/Response/Track.pm
 lib/WebService/MusicBrainz/Track.pm
 Makefile.PL
 MANIFEST
+META.yml			Module meta-data (added by MakeMaker)
 README
 t/Artist.t
 t/Factory.t
 t/Release.t
 t/Track.t
-META.yml                                 Module meta-data (added by MakeMaker)

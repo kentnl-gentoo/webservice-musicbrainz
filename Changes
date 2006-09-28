@@ -11,3 +11,7 @@ Revision history for Perl extension WebService::MusicBrainz.
 	- Improved test cases, added Factory.t test script
 	- include META.yml which was missing originally
 	- Remove .swp file accidentally left in distribution
+
+0.03 Wed Sep 27 2006
+        - RT Bug 21511 fix (Thomas Adamcik)
+        - RT Bug 21755 fix (Powder)
