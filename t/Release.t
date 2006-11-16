@@ -5,7 +5,7 @@
 
 # change 'tests => 1' to 'tests => last_test_to_print';
 
-use Test::More tests => 15;
+use Test::More tests => 33;
 BEGIN { use_ok('WebService::MusicBrainz::Release') };
 
 #########################
@@ -21,9 +21,43 @@ ok( $ws );
 my $search_title = $ws->search({ TITLE => 'Highway to Hell' });
 ok( $search_title );
 
-# TODO:  Need to find a DISCID for testing
-# my $search_discid = $ws->search({ DISCID => '' });
-# ok( $search_discid );
+my $title_release_list = $search_title->release_list();
+ok( $title_release_list );
+
+my $title_releases = $title_release_list->releases();
+ok( $title_releases );
+
+my $title_first_release = shift @$title_releases;
+ok( $title_first_release );
+
+ok( $title_first_release->title() eq 'Highway to Hell' );
+ok( $title_first_release->text_rep_language() eq 'ENG' );
+
+my $title_first_release_event_list = $title_first_release->release_event_list();
+ok( $title_first_release_event_list );
+
+my $title_first_release_disc_list = $title_first_release->disc_list();
+ok( $title_first_release_disc_list );
+ok( $title_first_release_disc_list->count() eq '7');
+
+my $title_first_release_track_list = $title_first_release->track_list();
+ok( $title_first_release_track_list );
+ok( $title_first_release_track_list->count() eq '10' );
+
+my $search_discid = $ws->search({ DISCID => 'XgrrQ8Npf9Uz_trPIFMrSz6Mk6Q-' });
+ok( $search_discid );
+
+my $search_discid_release = $search_discid->release();
+ok( $search_discid_release );
+
+ok( $search_discid_release->title() eq "Heartbreaker" );
+ok( $search_discid_release->score() eq "100" );
+
+my $search_discid_release_event_list = $search_discid_release->release_event_list();
+ok( scalar( @{ $search_discid_release_event_list->events() } ) > 1 );
+
+ok( $search_discid_release->disc_list()->count() eq "2" );
+ok( $search_discid_release->track_list()->count() eq "15" );
 
 my $search_artist = $ws->search({ ARTIST => 'sleater kinney' });
 ok( $search_artist );
@@ -60,3 +94,6 @@ ok( $search_inc_track_rels );
 
 my $search_inc_url_rels = $ws->search({ MBID => 'fed37cfc-2a6d-4569-9ac0-501a7c7598eb', INC => 'url-rels' });
 ok( $search_inc_url_rels );
+
+my $search_inc_release_events = $ws->search({ MBID => '5cc8e3ec-4910-45ed-b50b-2d91a82457a3', INC => 'release-events'});
+ok( $search_inc_release_events );

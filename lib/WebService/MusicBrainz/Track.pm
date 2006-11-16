@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Track;
 use strict;
 use WebService::MusicBrainz::Query;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 =head1 NAME
 
@@ -45,13 +45,6 @@ sub new {
 
    return $self;
 }
-
-=head2 _init()
-
-This method will initialize the Track object.  It will instantiate a WebService::MusicBrainz::Query object with
-track related parameters.  Internal use only.
-
-=cut
 
 sub _init {
    my $self = shift;

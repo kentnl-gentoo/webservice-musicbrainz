@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Release;
 use strict;
 use WebService::MusicBrainz::Query;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 =head1 NAME
 
@@ -44,14 +44,6 @@ sub new {
    return $self;
 }
 
-=head2 _init()
-
-This method will initialize the WebService::MusicBrainz::Release object and instantiate a WebService::MusicBrainz::Query
-object with parameters specific to a release.
-Internal use only.
-
-=cut
-
 sub _init {
    my $self = shift;
 
@@ -85,6 +77,7 @@ to define the search parameters.
     my $response = $ws->search({ TITLE => 'Highway to Hell' });
     my $response = $ws->search({ ARTIST => 'sleater kinney' });
     my $response = $ws->search({ ARTISTID => '65f4f0c5-ef9e-490c-aee3-909e7ae6b2ab' });
+    my $response = $ws->search({ DISCID => 'XgrrQ8Npf9Uz_trPIFMrSz6Mk6Q-' });
     my $response = $ws->search({ RELEASETYPES => 'Official', MBID => 'a89e1d92-5381-4dab-ba51-733137d0e431' });
     my $response = $ws->search({ MBID => 'fed37cfc-2a6d-4569-9ac0-501a7c7598eb', INC => 'artist' });
     my $response = $ws->search({ MBID => 'fed37cfc-2a6d-4569-9ac0-501a7c7598eb', INC => 'counts' });

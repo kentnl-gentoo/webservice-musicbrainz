@@ -15,3 +15,8 @@ Revision history for Perl extension WebService::MusicBrainz.
 0.03 Wed Sep 27 2006
         - RT Bug 21511 fix (Thomas Adamcik)
         - RT Bug 21755 fix (Powder)
+
+0.04 Wed Nov 15 2006
+	- Added feature for alternate mirrored host
+	- Added more response objects to more closly match schema
+	- Much closer to spec compliant (Schema: musicbrainz_mmd-1.0rc5.rng)

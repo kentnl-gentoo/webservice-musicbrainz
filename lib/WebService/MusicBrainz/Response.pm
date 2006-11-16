@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Response;
 use strict;
 use XML::Twig;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 =head1 NAME
 
@@ -39,12 +39,6 @@ sub new {
    return $self;
 }
 
-=head2 _get_twig()
-
-This method will create an XML::Twig object and parse the XML response which is then stored in the XML::Twig object.
-
-=cut
-
 sub _get_twig {
    my $self = shift;
 
@@ -71,12 +65,6 @@ sub as_xml {
    return $self->{_xml};
 }
 
-=head2 _init()
-
-This method will parse the XML response and act as a factory to generate the collection of WebService::MusicBrainz::Response::* objects that represent the XML data.
-
-=cut
-
 sub _init {
    my $self = shift;
 
@@ -88,64 +76,77 @@ sub _init {
 
    $metadata->generator( $xRoot->att('generator') ) if $xRoot->att('generator');
    $metadata->created( $xRoot->att('created') ) if $xRoot->att('created');
-
-   my @artist_list;
-   my @release_list;
-   my @track_list;
-
-   if($xRoot->first_child('artist')) {
-      my $xArtist = $xRoot->first_child('artist');
-
-      my $artist = _create_artist( $xArtist );
-
-      push @artist_list, $artist;
-
-   } elsif($xRoot->first_child('artist-list')) {
-      foreach my $xArtist ($xRoot->get_xpath('artist-list/artist')) {
-          my $artist = _create_artist( $xArtist );
-
-          push @artist_list, $artist;
-      }
-   } elsif($xRoot->first_child('release')) {
-      my $xRelease = $xRoot->first_child('release');
-
-      my $release = _create_release( $xRelease );
-
-      push @release_list, $release;
-
-   } elsif($xRoot->first_child('release-list')) {
-      foreach my $xRelease ($xRoot->get_xpath('release-list/release')) {
-          my $release = _create_release( $xRelease );
-
-          push @release_list, $release;
-      }
-
-   } elsif($xRoot->first_child('track')) {
-      my $xTrack = $xRoot->first_child('track');
-
-      my $track = _create_track( $xTrack );
-
-      push @track_list, $track;
-
-   } elsif($xRoot->first_child('track-list')) {
-      foreach my $xTrack ($xRoot->get_xpath('track-list/track')) {
-          my $track = _create_track( $xTrack );
-
-          push @track_list, $track;
-      }
-
-   }
-   
-   $metadata->artist_list(\@artist_list);
-   $metadata->track_list(\@track_list);
-   $metadata->release_list(\@release_list);
+   $metadata->score( $xRoot->att('ext:score') ) if $xRoot->att('ext:score');
+   $metadata->artist( _create_artist( $xRoot->first_child('artist') ) ) if $xRoot->first_child('artist');
+   $metadata->artist_list( _create_artist_list( $xRoot->first_child('artist-list') ) ) if $xRoot->first_child('artist-list');
+   $metadata->release( _create_release( $xRoot->first_child('release') ) ) if $xRoot->first_child('release');
+   $metadata->release_list( _create_release_list( $xRoot->first_child('release-list') ) )
+         if $xRoot->first_child('release-list');
+   $metadata->track( _create_track( $xRoot->first_child('track') ) ) if $xRoot->first_child('track');
+   $metadata->track_list( _create_track_list( $xRoot->first_child('track-list') ) ) if $xRoot->first_child('track-list');
 
    $self->{_metadata_cache} = $metadata;
 }
 
+=head2 generator()
+
+This method will return an optional value of the generator.
+
+=cut
+
+sub generator {
+    my $self = shift;
+
+    my $metadata = $self->{_metadata_cache};
+
+    return $metadata->generator();
+}
+
+=head2 created()
+
+This method will return an optional value of the created date.
+
+=cut
+
+sub created {
+    my $self = shift;
+
+    my $metadata = $self->{_metadata_cache};
+
+    return $metadata->created();
+}
+
+=head2 score()
+
+This method will return an optional value of the relevance score.
+
+=cut
+
+sub score {
+    my $self = shift;
+
+    my $metadata = $self->{_metadata_cache};
+
+    return $metadata->score();
+}
+
+=head2 metadata()
+
+This method will return an Response::Metadata object.
+
+=cut
+
+sub metadata {
+    my $self = shift;
+
+    my $metadata = $self->{_metadata_cache};
+
+    return $metadata;
+}
+
 =head2 artist()
 
-This method will return the first artist object from the artist list.
+This method will return an Response::Artist object.
 
 =cut
 
@@ -154,14 +155,14 @@ sub artist {
 
    my $metadata = $self->{_metadata_cache};
 
-   my $artist_list = $metadata->artist_list();
+   my $artist = $metadata->artist_list() ? shift @{ $metadata->artist_list()->artists() } : $metadata->artist();
 
-   return shift @{ $artist_list };
+   return $artist;
 }
 
 =head2 release()
 
-This method will return the first release object from the release list.
+This method will return an Reponse::Release object;.
 
 =cut
 
@@ -170,14 +171,14 @@ sub release {
 
    my $metadata = $self->{_metadata_cache};
 
-   my $release_list = $metadata->release_list();
+   my $release = $metadata->release_list() ? shift @{ $metadata->release_list()->releases() } : $metadata->release();
 
-   return shift @{ $release_list };
+   return $release;
 }
 
 =head2 track()
 
-This method will return the first track object from the track list.
+This method will return an Response::Track object.
 
 =cut
 
@@ -186,14 +187,14 @@ sub track {
 
    my $metadata = $self->{_metadata_cache};
 
-   my $track_list = $metadata->track_list();
+   my $track = $metadata->track_list() ? shift @{ $metadata->track_list()->tracks() } : $metadata->track();
 
-   return shift @{ $track_list };
+   return $metadata->track();
 }
 
 =head2 artist_list()
 
-This method will return the artist list.
+This method will return a reference to the Response::ArtistList object in a scalar context.  If in a array context, an array of Response::Artist objects will be returned.
 
 =cut
 
@@ -204,12 +205,12 @@ sub artist_list {
 
    my $artist_list = $metadata->artist_list();
 
-   return wantarray ? @$artist_list : $artist_list;
+   return wantarray ? @{ $artist_list->artists() } : $artist_list;
 }
 
 =head2 release_list()
 
-This method will return the release list.
+This method will return a reference to the Response::ReleaseList object in a scalar context.  If in a array context, an array of Response::Release objects will be returned.
 
 =cut
 
@@ -220,12 +221,12 @@ sub release_list {
 
    my $release_list = $metadata->release_list();
 
-   return wantarray ? @$release_list : $release_list;
+   return wantarray ? @{ $release_list->releases() } : $release_list;
 }
 
 =head2 track_list()
 
-This method will return the track list.
+This method will return a reference to the Response::TrackList object in a scalar context.  If in a array context, an array of Response::Track objects will be returned.
 
 =cut
 
@@ -236,15 +237,8 @@ sub track_list {
 
    my $track_list = $metadata->track_list();
 
-   return wantarray ? @$track_list : $track_list;
+   return wantarray ? @{ $track_list->tracks() } : $track_list;
 }
-
-=head2 _create_artist()
-
-Helper function to create a WebService::MusicBrainz::Response::Artist object and to populate it with data.
-Internal use only.
-
-=cut
 
 sub _create_artist {
    my $xArtist = shift;
@@ -264,52 +258,38 @@ sub _create_artist {
             if $xArtist->first_child('life-span') && $xArtist->first_child('life-span')->att('begin');
    $artist->life_span_end( $xArtist->first_child('life-span')->att('end') ) 
             if $xArtist->first_child('life-span') && $xArtist->first_child('life-span')->att('end');
+   $artist->score( $xArtist->att('ext:score') ) if $xArtist->att('ext:score');
 
-   if($xArtist->first_child('alias-list')) {
-       my @alias_list;
+   $artist->alias_list( _create_alias_list( $xArtist->first_child('alias-list') ) ) if $xArtist->first_child('alias-list');
 
-       foreach my $xAlias ($xArtist->get_xpath('alias-list/alias')) {
-           my $alias = _create_alias($xAlias);
+   $artist->relation_list( _create_relation_list( $xArtist->first_child('relation-list') ) )
+       if $xArtist->first_child('relation-list');
 
-	   push @alias_list, $alias;
-       }
-
-       $artist->alias_list( \@alias_list );
-   }
-
-   if($xArtist->first_child('relation-list')) {
-       my @relation_list;
-
-       foreach my $xRelation ($xArtist->get_xpath('relation-list/relation')) {
-           my $relation = _create_relation($xRelation);
-
-	   push @relation_list, $relation;
-       }
-
-       $artist->relation_list( \@relation_list );
-   }
-
-   if($xArtist->first_child('release-list')) {
-       my @release_list;
-
-       foreach my $xRelease ($xArtist->get_xpath('release-list/release')) {
-           my $release = _create_release($xRelease);
-
-	   push @release_list, $release;
-       }
-
-       $artist->release_list( \@release_list );
-   }
+   $artist->release_list( _create_release_list( $xArtist->first_child('release-list') ) )
+       if $xArtist->first_child('release-list');
 
    return $artist;
 }
 
-=head2 _create_release()
+sub _create_artist_list {
+   my $xArtistList = shift;
 
-Helper function to create a WebService::MusicBrainz::Response::Release object and to populate it with data.
-Internal use only.
+   require WebService::MusicBrainz::Response::ArtistList;
 
-=cut
+   my $artist_list = WebService::MusicBrainz::Response::ArtistList->new();
+
+   my @artists;
+
+   foreach my $xArtist ($xArtistList->get_xpath('artist')) {
+       my $artist = _create_artist( $xArtist );
+
+       push @artists, $artist;
+   }
+
+   $artist_list->artists( \@artists );
+
+   return $artist_list;
+}
 
 sub _create_release {
    my $xRelease = shift;
@@ -326,36 +306,18 @@ sub _create_release {
    $release->text_rep_script( $xRelease->first_child('text-representation')->att('script') )
         if $xRelease->first_child('text-representation') && $xRelease->first_child('text-representation')->att('script');
    $release->asin( $xRelease->first_child('asin')->text() ) if $xRelease->first_child('asin');
-
-   my $xArtist = $xRelease->first_child('artist');
-
-   if(defined($xArtist)) {
-       my $artist = _create_artist($xArtist);
-
-       $release->artist($artist);
-   }
-
-   my @track_list;
-
-   if ($xRelease->first_child('track-list')) {
-
-      foreach my $xTrack ($xRelease->get_xpath('track-list/track')) {
-          my $track = _create_track( $xTrack );
-          push @track_list, $track;
-      }
-   }
-
-   $release->track_list(\@track_list);
+   $release->score( $xRelease->att('ext:score') ) if $xRelease->att('ext:score');
+   $release->artist( _create_artist( $xRelease->first_child('artist') ) ) if $xRelease->first_child('artist');
+   $release->release_event_list( _create_release_event_list( $xRelease->first_child('release-event-list') ) )
+        if $xRelease->first_child('release-event-list');
+   $release->disc_list( _create_disc_list( $xRelease->first_child('disc-list') ) ) if $xRelease->first_child('disc-list');
+   $release->puid_list( _create_puid_list( $xRelease->first_child('puid-list') ) ) if $xRelease->first_child('puid-list');
+   $release->track_list( _create_track_list( $xRelease->first_child('track-list') ) ) if $xRelease->first_child('track-list');
+   $release->relation_list( _create_relation_list( $xRelease->first_child('relation-list') ) )
+        if $xRelease->first_child('relation-list');
 
    return $release;
 }
-
-=head2 _create_track()
-
-Helper function to create a WebService::MusicBrainz::Response::Track object and to populate it with data.
-Internal use only.
-
-=cut
 
 sub _create_track {
    my $xTrack = shift;
@@ -367,34 +329,37 @@ sub _create_track {
    $track->id( $xTrack->att('id') ) if $xTrack->att('id');
    $track->title( $xTrack->first_child('title')->text() ) if $xTrack->first_child('title');
    $track->duration( $xTrack->first_child('duration')->text() ) if $xTrack->first_child('duration');
-
-   my $xArtist = $xTrack->first_child('artist');
-
-   if(defined($xArtist)) {
-       my $artist = _create_artist($xArtist);
-
-       $track->artist($artist);
-   }
-
-   my @release_list;
-
-   foreach my $xRelease ($xTrack->get_xpath('release-list/release')) {
-       my $release = _create_release($xRelease);
-
-       push @release_list, $release;
-   }
-
-   $track->release_list(\@release_list);
+   $track->score( $xTrack->att('ext:score') ) if $xTrack->att('ext:score');
+   $track->artist( _create_artist( $xTrack->first_child('artist') ) ) if $xTrack->first_child('artist');
+   $track->release_list( _create_release_list( $xTrack->first_child('release-list') ) )
+        if $xTrack->first_child('release-list');
+   $track->puid_list( _create_puid_list( $xTrack->first_child('puid-list') ) ) if $xTrack->first_child('puid-list');
+   $track->relation_list( _create_relation_list( $xTrack->first_child('relation-list') ) )
+        if $xTrack->first_child('relation-list');
 
    return $track;
 }
 
-=head2 _create_alias()
+sub _create_track_list {
+   my $xTrackList = shift;
 
-Helper function to create a WebService::MusicBrainz::Response::Alias object and to populate it with data.
-Internal use only.
+   require WebService::MusicBrainz::Response::TrackList;
 
-=cut
+   my $track_list = WebService::MusicBrainz::Response::TrackList->new();
+
+   $track_list->count( $xTrackList->att('count') ) if $xTrackList->att('count');
+
+   my @tracks;
+
+   foreach my $xTrack ($xTrackList->get_xpath('track')) {
+       my $track = _create_track( $xTrack );
+       push @tracks, $track;
+   }
+
+   $track_list->tracks( \@tracks );
+
+   return $track_list;
+}
 
 sub _create_alias {
    my $xAlias = shift;
@@ -410,12 +375,28 @@ sub _create_alias {
    return $alias;
 }
 
-=head2 _create_relation()
+sub _create_alias_list {
+   my $xAliasList = shift;
 
-Helper function to create a WebService::MusicBrainz::Response::Relation object and to populate it with data.
-Internal use only.
+   require WebService::MusicBrainz::Response::AliasList;
 
-=cut
+   my $alias_list = WebService::MusicBrainz::Response::AliasList->new();
+
+   $alias_list->count( $xAliasList->att('count') ) if $xAliasList->att('count');
+   $alias_list->offset( $xAliasList->att('offset') ) if $xAliasList->att('offset');
+
+   my @aliases;
+
+   foreach my $xAlias ($xAliasList->get_xpath('alias')) {
+       my $alias = _create_alias($xAlias);
+
+       push @aliases, $alias if defined($alias);
+   }
+
+   $alias_list->aliases( \@aliases );
+
+   return $alias_list;
+}
 
 sub _create_relation {
    my $xRelation = shift;
@@ -430,22 +411,156 @@ sub _create_relation {
    $relation->attributes( $xRelation->att('attributes') ) if $xRelation->att('attributes');
    $relation->begin( $xRelation->att('begin') ) if $xRelation->att('begin');
    $relation->end( $xRelation->att('end') ) if $xRelation->att('end');
-
-   if($xRelation->first_child('artist')) {
-       my $artist = _create_artist($xRelation->first_child('artist'));
-
-       $relation->artist($artist);
-   } elsif($xRelation->first_child('release')) {
-       my $release = _create_release($xRelation->first_child('release'));
-
-       $relation->release($release);
-   } elsif($xRelation->first_child('track')) {
-       my $track = _create_track($xRelation->first_child('track'));
-
-       $relation->track($track);
-   }
+   $relation->score( $xRelation->att('ext:score') ) if $xRelation->att('ext:score');
+   $relation->artist( _create_artist( $xRelation->first_child('artist') ) ) if $xRelation->first_child('artist');
+   $relation->release( _create_release( $xRelation->first_child('release') ) ) if $xRelation->first_child('release');
+   $relation->track( _create_track( $xRelation->first_child('track') ) ) if $xRelation->first_child('relation');
 
    return $relation;
+}
+
+sub _create_relation_list {
+   my $xRelationList = shift;
+
+   require WebService::MusicBrainz::Response::RelationList;
+
+   my $relation_list = WebService::MusicBrainz::Response::RelationList->new();
+
+   $relation_list->target_type( $xRelationList->att('target-type') ) if $xRelationList->att('target-type');
+   $relation_list->count( $xRelationList->att('count') ) if $xRelationList->att('count');
+   $relation_list->offset( $xRelationList->att('offset') ) if $xRelationList->att('offset');
+
+   my @relations;
+
+   foreach my $xRelation ($xRelationList->get_xpath('relation')) {
+       my $relation = _create_relation($xRelation);
+
+       push @relations, $relation if defined($relation);
+   }
+
+   $relation_list->relations( \@relations );
+
+   return $relation_list;
+}
+
+sub _create_event {
+   my $xEvent = shift;
+
+   require WebService::MusicBrainz::Response::ReleaseEvent;
+
+   my $event = WebService::MusicBrainz::Response::ReleaseEvent->new();
+
+   $event->date( $xEvent->att('date') ) if $xEvent->att('date');
+   $event->country( $xEvent->att('country') ) if $xEvent->att('country');
+
+   return $event;
+}
+
+sub _create_release_event_list {
+   my $xReleaseEventList = shift;
+
+   require WebService::MusicBrainz::Response::ReleaseEventList;
+
+   my $release_event_list = WebService::MusicBrainz::Response::ReleaseEventList->new();
+
+   my @events;
+
+   foreach my $xEvent ($xReleaseEventList->get_xpath('event')) {
+       my $event = _create_event( $xEvent );
+       push @events, $event;
+   }
+
+   $release_event_list->events( \@events );
+
+   return $release_event_list;
+}
+
+sub _create_release_list {
+   my $xReleaseList = shift;
+
+   require WebService::MusicBrainz::Response::ReleaseList;
+
+   my $release_list = WebService::MusicBrainz::Response::ReleaseList->new();
+
+   $release_list->count( $xReleaseList->att('count') ) if $xReleaseList->att('count');
+   $release_list->offset( $xReleaseList->att('offset') ) if $xReleaseList->att('offset');
+
+   my @releases;
+
+   foreach my $xRelease ($xReleaseList->get_xpath('release')) {
+       my $release = _create_release($xRelease);
+
+       push @releases, $release if defined($release);
+   }
+
+   $release_list->releases( \@releases );
+
+   return $release_list;
+}
+
+sub _create_disc {
+   my $xDisc = shift;
+
+   require WebService::MusicBrainz::Response::Disc;
+
+   my $disc = WebService::MusicBrainz::Response::Disc->new();
+
+   $disc->id( $xDisc->att('id') ) if $xDisc->att('id');
+   $disc->sectors( $xDisc->att('sectors') ) if $xDisc->att('sectors');
+
+   return $disc;
+}
+
+sub _create_disc_list {
+   my $xDiscList = shift;
+
+   require WebService::MusicBrainz::Response::DiscList;
+
+   my $disc_list = WebService::MusicBrainz::Response::DiscList->new();
+
+   my @discs;
+
+   $disc_list->count( $xDiscList->att('count') ) if $xDiscList->att('count');
+
+   foreach my $xDisc ($xDiscList->get_xpath('disc')) {
+      my $disc = _create_disc( $xDisc );
+      push @discs, $disc;
+   }
+
+   $disc_list->discs( \@discs );
+
+   return $disc_list;
+}
+
+sub _create_puid {
+   my $xPuid = shift;
+
+   require WebService::MusicBrainz::Response::Puid;
+
+   my $puid = WebService::MusicBrainz::Response::Puid->new();
+
+   $puid->id( $xPuid->att('id') ) if $xPuid->att('id');
+
+   return $puid;
+}
+
+sub _create_puid_list {
+   my $xPuidList = shift;
+
+   require WebService::MusicBrainz::Response::PuidList;
+
+   my $puid_list = WebService::MusicBrainz::Response::PuidList->new();
+
+   my @puids;
+
+   foreach my $xPuid ($xPuidList->get_xpath('puid')) {
+       my $puid = _create_puid( $xPuid );
+       push @puids, $puid;
+   }
+
+   $puid_list->puids( \@puids );
+
+   return $puid_list;
 }
 
 =head1 AUTHOR

@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Artist;
 use strict;
 use WebService::MusicBrainz::Query;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 =head1 NAME
 
@@ -31,7 +31,9 @@ This module is used to query an artist from the MusicBrainz web service.
 
 =head2 new()
 
-This method is the constructor and it will make a call for initialization.
+This method is the constructor and it will make a call for initialization.  This method will take an optional HOST parameter to specify a mirrored server.  The default is "musicbrainz.org".  
+
+my $ws = WebService::MusicBrainz::Artist->new(HOST => 'de.musicbrainz.org');
 
 =cut
 
@@ -41,22 +43,15 @@ sub new {
 
    bless $self, $class;
 
-   $self->_init();
+   $self->_init(@_);
 
    return $self;
 }
 
-=head2 _init()
-
-This method will initialize the object and instantiate a WebService::MusicBrainz::Query object with artist specific
-parameters.  Internal use only.
-
-=cut
-
 sub _init {
    my $self = shift;
 
-   my $q = WebService::MusicBrainz::Query->new();
+   my $q = WebService::MusicBrainz::Query->new(@_);
 
    $q->set_url_params(qw/mbid name limit/);
    $q->set_inc_params(qw/aliases artist-rels release-rels track-rels url-rels sa- va-/);

@@ -2,9 +2,10 @@ package WebService::MusicBrainz::Query;
 
 use strict;
 use LWP::UserAgent;
+use URI;
 use WebService::MusicBrainz::Response;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 =head1 NAME
 
@@ -26,7 +27,7 @@ instantiated by any client but will only be used internally within the Artist, R
 
 =head2 new()
 
-This method is the constructor and it will call for  initialization.
+This method is the constructor and it will call for initialization.  An optional HOST parameter can be passed to select a different mirrored server.
 
 =cut
 
@@ -36,25 +37,27 @@ sub new {
 
    bless $self, $class;
 
-   $self->_init();
+   $self->_init(@_);
 
    return $self;
 }
 
-=head2 _init()
-
-This method will initialize the WebService::MusicBrainz::Query object.  The base URL is being defined here.
-Internal use only.
-
-=cut
-
 sub _init {
    my $self = shift;
+   my %params = @_;
 
+   my $web_service_uri = URI->new();
+
+   my $web_service_uri_scheme = "http";
+   my $web_service_host = $params{HOST} || 'musicbrainz.org';
    my $web_service_namespace = 'ws';
    my $web_service_version = '1';
 
-   $self->{_baseurl} = 'http://musicbrainz.org/' . $web_service_namespace . '/' . $web_service_version . '/';
+   $web_service_uri->scheme($web_service_uri_scheme);
+   $web_service_uri->host($web_service_host);
+   $web_service_uri->path("$web_service_namespace/$web_service_version/");
+
+   $self->{_baseurl} = $web_service_uri->as_string();
 }
 
 =head2 set_url_params()
@@ -86,12 +89,6 @@ sub set_inc_params {
       push @{ $self->{_valid_inc_params} }, lc($p);
    }
 }
-
-=head2 _url()
-
-Construct a sting containing the URL based on given parameters.
-
-=cut
 
 sub _url {
    my $self = shift;
@@ -138,12 +135,6 @@ sub get {
 
    die "URL (", $url, ") Request Failed : ", $response->message(), "\n";
 }
-
-=head2 _validate_params()
-
-Validate the URL query parameters defined by the client.
-
-=cut
 
 sub _validate_params {
    my $self = shift;

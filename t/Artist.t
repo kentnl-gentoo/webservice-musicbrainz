@@ -5,7 +5,7 @@
 
 # change 'tests => 1' to 'tests => last_test_to_print';
 
-use Test::More tests => 36;
+use Test::More tests => 54;
 BEGIN { use_ok('WebService::MusicBrainz::Artist') };
 
 #########################
@@ -15,6 +15,10 @@ BEGIN { use_ok('WebService::MusicBrainz::Artist') };
 
 my $ws = WebService::MusicBrainz::Artist->new();
 ok( $ws, 'create WebService::MusicBrainz::Artist object' );
+
+my $wsde = WebService::MusicBrainz::Artist->new(HOST => 'de.musicbrainz.org');
+my $wsde_query = $wsde->query();
+ok( $wsde_query->{_baseurl} =~ m/de\.musicbrainz\.org/, 'create WebService::MusicBrainz::Artist object/altername host' );
 
 ####  TEST ARTIST MBID SEARCH ###############################
 
@@ -43,6 +47,10 @@ ok( $artist_name->sort_name() eq "Throwing Muses", 'check artist sort name' );
 ok( $artist_name->life_span_begin() eq "1983", 'check artist life span begin' );
 ok( $artist_name->life_span_end() eq "2003", 'check artist life span end' );
 
+my $search_name2 = $ws->search({ NAME => 'Van Halen' });
+my $artist_name2 = $search_name2->artist();
+ok( $artist_name2->score() eq "100", 'get first artist score of 100' );
+
 ####  TEST ARTIST NAME SEARCH ###############################
 
 ####  TEST ARTIST NAME LIMIT SEARCH ###############################
@@ -55,7 +63,7 @@ ok( $search_name_limit, 'get NAME, LIMIT search response object' );
 my $artist_name_limit = $search_name_limit->artist_list();
 
 ok( $artist_name_limit, 'get artist list response object' );
-ok( scalar(@{ $artist_name_limit }) == $limit, 'check size of artist list matches limit' );
+ok( scalar(@{ $artist_name_limit->artists() }) == $limit, 'check size of artist list matches limit' );
 
 ####  TEST ARTIST NAME LIMIT SEARCH ###############################
 
@@ -72,7 +80,7 @@ ok( $artist_inc_aliases->name() eq "Prince", 'check artist name' );
 my $artist_alias_list = $artist_inc_aliases->alias_list();
 ok( $artist_alias_list, 'get artist alias list' );
 
-ok( scalar(@{ $artist_alias_list }) > 3, 'check size of artist alias list' );
+ok( scalar($artist_alias_list->aliases()) > 3, 'check size of artist alias list' );
 
 ####  TEST ARTIST MBID ALIASES SEARCH ###############################
 
@@ -91,10 +99,13 @@ ok( $artist_inc_artist_rels->life_span_begin() eq "1981-10", 'check artist life 
 my $artist_inc_relation_list = $artist_inc_artist_rels->relation_list();
 ok( $artist_inc_relation_list, 'get artist relation list' );
 
-foreach my $relation (@{ $artist_inc_relation_list }) {
+foreach my $relation (@{ $artist_inc_relation_list->relations() }) {
     my $artist = $relation->artist();
 
     if($artist->name() eq "Jason Newsted") {
+	 ok( $relation->type() eq "MemberOfBand", 'check relation type' );
+	 ok( $relation->direction() eq "backward", 'check relation direction' );
+	 ok( $relation->target() eq "248ead7d-8058-4e0c-b334-fde70c036f8d", 'check relation target' );
 	 ok( $relation->begin() eq "1986", 'check artist begin relation' );
 	 ok( $relation->end() eq "2001", 'check artist end relation' );
          ok( $artist->sort_name() eq "Newsted, Jason", 'check artist sort name' );
@@ -115,12 +126,59 @@ ok( $artist_inc_release_rels, 'get artist response object' );
 my $artist_inc_release_relation_list = $artist_inc_release_rels->relation_list();
 ok( $artist_inc_release_relation_list, 'get artist relation list' );
 
-ok( scalar(@{ $artist_inc_release_relation_list }) > 3, 'check size of artist relation list' );
+ok( scalar($artist_inc_release_relation_list->relations()) > 3, 'check size of artist relation list' );
 
 ####  TEST ARTIST MBID RELEASE RELATIONS SEARCH ###############################
 
 my $search_inc_track_rels = $ws->search({ MBID => '65f4f0c5-ef9e-490c-aee3-909e7ae6b2ab', INC => 'track-rels' });
 ok( $search_inc_track_rels, 'get INC track_rels search response object' );
+my $search_inc_track_rels_artist = $search_inc_track_rels->artist();
+ok( $search_inc_track_rels_artist, 'check INC track_rels artist response' );
 
 my $search_inc_url_rels = $ws->search({ MBID => '65f4f0c5-ef9e-490c-aee3-909e7ae6b2ab', INC => 'url-rels' });
 ok( $search_inc_url_rels, 'get INC url_rels search response object' );
+
+my $search_inc_url_rels_artist = $search_inc_url_rels->artist();
+ok ( $search_inc_url_rels_artist, 'check INC url_rels search artist' );
+my $search_inc_url_rels_artist_relation_list = $search_inc_url_rels_artist->relation_list();
+
+foreach my $relation ( @{ $search_inc_url_rels_artist_relation_list->relations() } ) {
+     if($relation->type() eq "Wikipedia") {
+        ok( $relation->target() =~ m/wikipedia/, 'check INC url_rels relation url' );
+     }
+}
+
+#### TEST ARTIST MBID SINGLE ARTIST RELEASE SEARCH ########################################
+
+my $sa_album_artist_search = $ws->search({ MBID => 'abe2669a-a612-4bf6-9193-bb4f4b8a9088', INC => 'sa-Album' });
+ok( $sa_album_artist_search, 'check INC sa-Album artist search object' );
+
+my $sa_album_artist = $sa_album_artist_search->artist();
+ok( $sa_album_artist, 'check INC sa-Album artist object' );
+
+my $sa_album_artist_release_list = $sa_album_artist->release_list();
+
+foreach my $release (@{ $sa_album_artist_release_list->releases() }) {
+   if($release->id() eq "2f355069-0524-4f79-a6be-8a4ea5ff5eba") {
+       ok($release->type() eq "Album Official", 'check INC sa-Album artist release type' );
+       ok($release->title() eq "Whatever and Ever Amen", 'check INC sa-Album artist release type' );
+       ok($release->text_rep_language() eq "ENG", 'check INC sa-Album artist release test rep language' );
+       ok($release->text_rep_script() eq "Latn", 'check INC sa-Album artist release test rep script' );
+   }
+}
+
+#### TEST ARTIST MBID VARIOUS ARTIST RELEASE SEARCH ############################
+my $va_album_vartist_search = $ws->search({ MBID => 'c80f38a6-9980-485d-997c-5c1a9cbd0d64', INC => 'va-Soundtrack' });
+ok( $va_album_vartist_search, 'check INC va_soundtrack search object' );
+
+my $va_album_vartist_search_artist = $va_album_vartist_search->artist();
+ok( $va_album_vartist_search_artist, 'check INC va_soundtrack search artist object' );
+
+my $va_album_vartist_search_artist_release_list = $va_album_vartist_search_artist->release_list();
+
+foreach my $release (@{ $va_album_vartist_search_artist_release_list->releases() }) {
+    if($release->id() eq "c8e0d462-3634-44f5-9025-a93c5f373e1c") {
+       ok( $release->type() eq "Soundtrack Official", 'check INC va_soundtrack release type' );
+       ok( $release->title() eq "Elizabethtown", 'chck INC va_soundtrack release title' );
+    }
+}

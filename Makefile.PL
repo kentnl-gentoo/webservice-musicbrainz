@@ -4,6 +4,7 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     NAME              => 'WebService::MusicBrainz',
+    LICENSE           => 'perl',
     VERSION_FROM      => 'lib/WebService/MusicBrainz/Query.pm', # finds $VERSION
     PREREQ_PM         => { XML::Twig => 3,
                            LWP::UserAgent => 2,
