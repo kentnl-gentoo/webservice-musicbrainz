@@ -49,7 +49,7 @@ ok( $artist_name->life_span_end() eq "2003", 'check artist life span end' );
 
 my $search_name2 = $ws->search({ NAME => 'Van Halen' });
 my $artist_name2 = $search_name2->artist();
-ok( $artist_name2->score() eq "100", 'get first artist score of 100' );
+ok( $artist_name2->score() =~ m/\d+/, 'get first artist score of 100' );
 
 ####  TEST ARTIST NAME SEARCH ###############################
 

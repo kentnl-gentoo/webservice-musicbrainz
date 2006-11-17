@@ -20,3 +20,6 @@ Revision history for Perl extension WebService::MusicBrainz.
 	- Added feature for alternate mirrored host
 	- Added more response objects to more closly match schema
 	- Much closer to spec compliant (Schema: musicbrainz_mmd-1.0rc5.rng)
+
+0.05 Thu Nov 16 2006
+	- Some test were failing so I corrected those and added a few more

@@ -5,7 +5,7 @@ use LWP::UserAgent;
 use URI;
 use WebService::MusicBrainz::Response;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 =head1 NAME
 

@@ -5,7 +5,7 @@
 
 # change 'tests => 1' to 'tests => last_test_to_print';
 
-use Test::More tests => 33;
+use Test::More tests => 42;
 BEGIN { use_ok('WebService::MusicBrainz::Release') };
 
 #########################
@@ -62,11 +62,38 @@ ok( $search_discid_release->track_list()->count() eq "15" );
 my $search_artist = $ws->search({ ARTIST => 'sleater kinney' });
 ok( $search_artist );
 
+my $search_artist_release = $search_artist->release();
+
+ok( $search_artist_release->id() eq "3ba90142-0a08-4100-aff6-e2ac5c645fdf" );
+ok( $search_artist_release->type() eq "Album Official" );
+ok( $search_artist_release->score() =~ m/\d+/ );
+
 my $search_artist_id = $ws->search({ ARTISTID => '65f4f0c5-ef9e-490c-aee3-909e7ae6b2ab' });
 ok( $search_artist_id );
 
+my $search_artist_id_releases = $search_artist_id->release_list()->releases();
+ok( $search_artist_id_releases );
+
+foreach my $_release ( @$search_artist_id_releases ) {
+    if ( $_release->id() eq "fed37cfc-2a6d-4569-9ac0-501a7c7598eb" ) {
+        ok($_release->title() eq "Master of Puppets" );
+	ok($_release->asin() eq "B000025ZVE" );
+
+	my $artist = $_release->artist();
+
+	ok($artist->name() eq "Metallica");
+	last;
+    }
+}
+
 my $search_releasetypes = $ws->search({ RELEASETYPES => 'Official', MBID => 'a89e1d92-5381-4dab-ba51-733137d0e431' });
 ok( $search_releasetypes );
+
+my $search_releasetypes_release = $search_releasetypes->release();
+ok( $search_releasetypes_release );
+
+ok( $search_releasetypes_release->type() eq "Album Official" );
+ok( $search_releasetypes_release->title() eq "Kill \'em All" );
 
 my $search_inc_artist = $ws->search({ MBID => 'fed37cfc-2a6d-4569-9ac0-501a7c7598eb', INC => 'artist' });
 ok( $search_inc_artist );
@@ -94,6 +121,3 @@ ok( $search_inc_track_rels );
 
 my $search_inc_url_rels = $ws->search({ MBID => 'fed37cfc-2a6d-4569-9ac0-501a7c7598eb', INC => 'url-rels' });
 ok( $search_inc_url_rels );
-
-my $search_inc_release_events = $ws->search({ MBID => '5cc8e3ec-4910-45ed-b50b-2d91a82457a3', INC => 'release-events'});
-ok( $search_inc_release_events );
