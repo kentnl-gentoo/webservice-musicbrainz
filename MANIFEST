@@ -16,6 +16,7 @@ lib/WebService/MusicBrainz/Response/PuidList.pm
 lib/WebService/MusicBrainz/Response/Relation.pm
 lib/WebService/MusicBrainz/Response/RelationList.pm
 lib/WebService/MusicBrainz/Response/Release.pm
+lib/WebService/MusicBrainz/Response/ReleaseEvent.pm
 lib/WebService/MusicBrainz/Response/ReleaseEventList.pm
 lib/WebService/MusicBrainz/Response/ReleaseList.pm
 lib/WebService/MusicBrainz/Response/Track.pm

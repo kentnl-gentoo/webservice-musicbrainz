@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                WebService-MusicBrainz
-version:             0.05
+version:             0.06
 abstract:            Interface to MusicBrainz web service
 license:             perl
 generated_by:        ExtUtils::MakeMaker version 6.31

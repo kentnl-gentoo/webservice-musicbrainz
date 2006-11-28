@@ -23,3 +23,6 @@ Revision history for Perl extension WebService::MusicBrainz.
 
 0.05 Thu Nov 16 2006
 	- Some test were failing so I corrected those and added a few more
+
+0.06 Mon Nov 26 2006
+	- Incomplete MANIFEST file causing failures
