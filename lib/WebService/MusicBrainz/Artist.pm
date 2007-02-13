@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Artist;
 use strict;
 use WebService::MusicBrainz::Query;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 =head1 NAME
 
@@ -15,13 +15,13 @@ WebService::MusicBrainz::Artist
 
     my $ws = WebService::MusicBrainz::Artist->new();
 
-    my $response = $ws->search({ NAME => 'throwing muses' });
+    my $response = $ws->search({ NAME => 'white lion' });
 
     my $artist = $response->artist(); # get first in list
 
     print $artist->name(), " ", $artist->life_span_begin(), "-", $artist->life_span_end(), "\n";
 
-    # OUTPUT: Throwing Muses 1983-2003
+    # OUTPUT: White Lion 1983-1991
 
 =head1 DESCRIPTION
 

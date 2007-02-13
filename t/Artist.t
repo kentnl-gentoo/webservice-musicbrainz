@@ -36,16 +36,16 @@ ok( $artist_mbid->sort_name() eq "Black Keys, The", 'check artist sort name' );
 
 ####  TEST ARTIST NAME SEARCH ###############################
 
-my $search_name = $ws->search({ NAME => 'throwing muses' });
+my $search_name = $ws->search({ NAME => 'white lion' });
 ok( $search_name, 'get NAME search response object' );
 
 my $artist_name = $search_name->artist();
 ok( $artist_name, 'get artist response object' );
 
-ok( $artist_name->name() eq "Throwing Muses", 'check artist name' );
-ok( $artist_name->sort_name() eq "Throwing Muses", 'check artist sort name' );
+ok( $artist_name->name() eq "White Lion", 'check artist name' );
+ok( $artist_name->sort_name() eq "White Lion", 'check artist sort name' );
 ok( $artist_name->life_span_begin() eq "1983", 'check artist life span begin' );
-ok( $artist_name->life_span_end() eq "2003", 'check artist life span end' );
+ok( $artist_name->life_span_end() eq "1991", 'check artist life span end' );
 
 my $search_name2 = $ws->search({ NAME => 'Van Halen' });
 my $artist_name2 = $search_name2->artist();

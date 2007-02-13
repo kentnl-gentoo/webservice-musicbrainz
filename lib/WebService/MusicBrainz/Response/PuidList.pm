@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Response::PuidList;
 use strict;
 use base 'Class::Accessor';
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 =head1 NAME
 
