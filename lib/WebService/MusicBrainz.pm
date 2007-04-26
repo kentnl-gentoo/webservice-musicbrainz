@@ -2,7 +2,7 @@ package WebService::MusicBrainz;
 
 use strict;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 =head1 NAME
 
@@ -22,7 +22,7 @@ This module will act as a factory using static methods to return specific web se
 
 =head1 METHODS
 
-=head2 artist_new()
+=head2 new_artist()
 
 Return new instance of WebService::MusicBrainz::Artist object.
 

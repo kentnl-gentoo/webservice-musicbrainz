@@ -29,3 +29,6 @@ Revision history for Perl extension WebService::MusicBrainz.
 
 0.07 Tue Feb 13 2007
 	- Failing test due to data change, test corrected (HairMetalAddict)
+
+0.08 Web Apr 25 2007
+	- Another test was failing due to data change.

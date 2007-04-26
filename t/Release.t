@@ -38,7 +38,7 @@ ok( $title_first_release_event_list );
 
 my $title_first_release_disc_list = $title_first_release->disc_list();
 ok( $title_first_release_disc_list );
-ok( $title_first_release_disc_list->count() eq '7');
+ok( $title_first_release_disc_list->count() eq '8');
 
 my $title_first_release_track_list = $title_first_release->track_list();
 ok( $title_first_release_track_list );
