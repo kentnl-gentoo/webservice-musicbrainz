@@ -2,7 +2,7 @@ package WebService::MusicBrainz;
 
 use strict;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 =head1 NAME
 
@@ -74,7 +74,7 @@ sub new_release {
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2006 by Bob Faist
+Copyright 2006-2007 by Bob Faist
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

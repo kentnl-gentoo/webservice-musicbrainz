@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Release;
 use strict;
 use WebService::MusicBrainz::Query;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 =head1 NAME
 
@@ -110,7 +110,7 @@ sub search {
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2006 by Bob Faist
+Copyright 2006-2007 by Bob Faist
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

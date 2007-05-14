@@ -5,7 +5,7 @@
 
 # change 'tests => 1' to 'tests => last_test_to_print';
 
-use Test::More tests => 42;
+use Test::More tests => 39;
 BEGIN { use_ok('WebService::MusicBrainz::Release') };
 
 #########################
@@ -64,9 +64,18 @@ ok( $search_artist );
 
 my $search_artist_release = $search_artist->release();
 
-ok( $search_artist_release->id() eq "3ba90142-0a08-4100-aff6-e2ac5c645fdf" );
-ok( $search_artist_release->type() eq "Album Official" );
-ok( $search_artist_release->score() =~ m/\d+/ );
+foreach my $_release (@{ $search_artist->release_list()->releases() }) {
+    if($_release->id() eq "3ba90142-0a08-4100-aff6-e2ac5c645fdf") {
+        ok( $_release->type() eq "Album Official" );
+        ok( $_release->score() =~ m/\d+/ );
+        my $_events = $_release->release_event_list()->events();
+
+        foreach my $_event (@{ $_events }) {
+           ok( $_event->date() =~ m/US 1996/);
+           last;
+        }
+    }
+}
 
 my $search_artist_id = $ws->search({ ARTISTID => '65f4f0c5-ef9e-490c-aee3-909e7ae6b2ab' });
 ok( $search_artist_id );
@@ -105,10 +114,10 @@ my $search_inc_release_events = $ws->search({ MBID => 'fed37cfc-2a6d-4569-9ac0-5
 ok( $search_inc_release_events );
 
 my $search_inc_discs = $ws->search({ MBID => 'fed37cfc-2a6d-4569-9ac0-501a7c7598eb', INC => 'discs' });
-ok( $search_inc_discs );
+ok( $search_inc_discs, "release disc" );
 
 my $search_inc_tracks = $ws->search({ MBID => 'fed37cfc-2a6d-4569-9ac0-501a7c7598eb', INC => 'tracks' });
-ok( $search_inc_tracks );
+ok( $search_inc_tracks, "release tracks" );
 
 my $search_inc_artist_rels = $ws->search({ MBID => 'fed37cfc-2a6d-4569-9ac0-501a7c7598eb', INC => 'artist-rels' });
 ok( $search_inc_artist_rels );

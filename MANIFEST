@@ -1,3 +1,4 @@
+Build.PL
 Changes
 lib/WebService/MusicBrainz.pm
 lib/WebService/MusicBrainz/Artist.pm
@@ -23,8 +24,8 @@ lib/WebService/MusicBrainz/Response/Track.pm
 lib/WebService/MusicBrainz/Response/TrackList.pm
 lib/WebService/MusicBrainz/Track.pm
 Makefile.PL
-MANIFEST
-META.yml			Module meta-data (added by MakeMaker)
+MANIFEST			This list of files
+META.yml
 README
 t/Artist.t
 t/Factory.t

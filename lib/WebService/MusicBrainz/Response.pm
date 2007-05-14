@@ -1,9 +1,9 @@
 package WebService::MusicBrainz::Response;
 
 use strict;
-use XML::Twig;
+use XML::LibXML;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 =head1 NAME
 
@@ -32,25 +32,41 @@ sub new {
 
    $self->{_xml} = $params{XML} || die "XML parameter required";
 
-   $self->_get_twig();
+   $self->_load_xml();
 
    $self->_init();
 
    return $self;
 }
 
-sub _get_twig {
+sub _load_xml {
    my $self = shift;
 
-   my $xTwig = XML::Twig->new();
+   my $parser = XML::LibXML->new();
 
-   $xTwig->safe_parse($self->{_xml}) or die "Failure to parse XML";
+   my $document = $parser->parse_string($self->{_xml}) or die "Failure to parse XML";
 
-   my $xRoot = $xTwig->root();
+   my $root = $document->getDocumentElement();
 
-   $self->{_xmltwig} = $xRoot;
+   my $xpc = XML::LibXML::XPathContext->new($root);
+
+   $xpc->registerNs('mmd', $root->getAttribute('xmlns'));
+   $xpc->registerNs('ext', $root->getAttribute('xmlns:ext')) if $root->getAttribute('xmlns:ext');
+
+   $self->{_xmlobj} = $xpc;
+   $self->{_xmlroot} = $root;
 
    return;
+}
+
+=head2 xpc()
+
+=cut
+
+sub xpc {
+    my $self = shift;
+
+    return $self->{_xmlobj};
 }
 
 =head2 as_xml()
@@ -62,28 +78,34 @@ This method returns the raw XML from the MusicBrainz web service response.
 sub as_xml {
    my $self = shift;
 
-   return $self->{_xml};
+   return $self->{_xmlroot}->toString();
 }
 
 sub _init {
    my $self = shift;
 
-   my $xRoot = $self->{_xmltwig} || return;
+   my $xpc = $self->xpc() || return;
+
+   my ($xArtist) = $xpc->findnodes('mmd:artist[1]');
+   my ($xArtistList) = $xpc->findnodes('mmd:artist-list[1]');
+   my ($xRelease) = $xpc->findnodes('mmd:release[1]');
+   my ($xReleaseList) = $xpc->findnodes('mmd:release-list[1]');
+   my ($xTrack) = $xpc->findnodes('mmd:track[1]');
+   my ($xTrackList) = $xpc->findnodes('mmd:track-list[1]');
 
    require WebService::MusicBrainz::Response::Metadata;
 
    my $metadata = WebService::MusicBrainz::Response::Metadata->new();
 
-   $metadata->generator( $xRoot->att('generator') ) if $xRoot->att('generator');
-   $metadata->created( $xRoot->att('created') ) if $xRoot->att('created');
-   $metadata->score( $xRoot->att('ext:score') ) if $xRoot->att('ext:score');
-   $metadata->artist( _create_artist( $xRoot->first_child('artist') ) ) if $xRoot->first_child('artist');
-   $metadata->artist_list( _create_artist_list( $xRoot->first_child('artist-list') ) ) if $xRoot->first_child('artist-list');
-   $metadata->release( _create_release( $xRoot->first_child('release') ) ) if $xRoot->first_child('release');
-   $metadata->release_list( _create_release_list( $xRoot->first_child('release-list') ) )
-         if $xRoot->first_child('release-list');
-   $metadata->track( _create_track( $xRoot->first_child('track') ) ) if $xRoot->first_child('track');
-   $metadata->track_list( _create_track_list( $xRoot->first_child('track-list') ) ) if $xRoot->first_child('track-list');
+   $metadata->generator( $xpc->find('@generator')->pop()->getValue() ) if $xpc->find('@generator');
+   $metadata->created( $xpc->find('@created')->pop()->getValue() ) if $xpc->find('@created');
+   $metadata->score( $xpc->find('@ext:score')->pop()->getValue() ) if $xpc->lookupNs('ext') && $xpc->find('@ext:score');
+   $metadata->artist( $self->_create_artist( $xArtist ) ) if $xArtist;
+   $metadata->artist_list( $self->_create_artist_list( $xArtistList ) ) if $xArtistList;
+   $metadata->release( $self->_create_release( $xRelease ) ) if $xRelease;
+   $metadata->release_list( $self->_create_release_list( $xReleaseList ) ) if $xReleaseList;
+   $metadata->track( $self->_create_track( $xTrack ) ) if $xTrack;
+   $metadata->track_list( $self->_create_track_list( $xTrackList ) ) if $xTrackList;
 
    $self->{_metadata_cache} = $metadata;
 }
@@ -241,38 +263,43 @@ sub track_list {
 }
 
 sub _create_artist {
-   my $xArtist = shift;
+   my $self = shift;
+   my ($xArtist) = @_;
+
+   my $xpc = $self->xpc();
+
+   my ($xSortName) = $xpc->findnodes('mmd:sort-name[1]', $xArtist);
+   my ($xName) = $xpc->findnodes('mmd:name[1]', $xArtist);
+   my ($xDisambiguation) = $xpc->findnodes('mmd:disambiguation[1]', $xArtist);
+   my ($xLifeSpan) = $xpc->findnodes('mmd:life-span[1]', $xArtist);
+   my ($xAliasList) = $xpc->findnodes('mmd:alias-list[1]', $xArtist);
+   my ($xRelationList) = $xpc->findnodes('mmd:relation-list[1]', $xArtist);
+   my ($xReleaseList) = $xpc->findnodes('mmd:release-list[1]', $xArtist);
 
    require WebService::MusicBrainz::Response::Artist;
 
    my $artist = WebService::MusicBrainz::Response::Artist->new();
 
-   $artist->id( $xArtist->att('id') ) if $xArtist->att('id');
-   $artist->type( $xArtist->att('type') ) if $xArtist->att('type');
-   $artist->name( $xArtist->first_child('name')->text() ) if $xArtist->first_child('name');
-   $artist->sort_name( $xArtist->first_child('sort-name')->text() ) 
-            if $xArtist->first_child('sort-name');
-   $artist->disambiguation( $xArtist->first_child('disambiguation')->text() ) 
-            if $xArtist->first_child('disambiguation');
-   $artist->life_span_begin( $xArtist->first_child('life-span')->att('begin') ) 
-            if $xArtist->first_child('life-span') && $xArtist->first_child('life-span')->att('begin');
-   $artist->life_span_end( $xArtist->first_child('life-span')->att('end') ) 
-            if $xArtist->first_child('life-span') && $xArtist->first_child('life-span')->att('end');
-   $artist->score( $xArtist->att('ext:score') ) if $xArtist->att('ext:score');
-
-   $artist->alias_list( _create_alias_list( $xArtist->first_child('alias-list') ) ) if $xArtist->first_child('alias-list');
-
-   $artist->relation_list( _create_relation_list( $xArtist->first_child('relation-list') ) )
-       if $xArtist->first_child('relation-list');
-
-   $artist->release_list( _create_release_list( $xArtist->first_child('release-list') ) )
-       if $xArtist->first_child('release-list');
+   $artist->id( $xArtist->getAttribute('id') ) if $xArtist->getAttribute('id');
+   $artist->type( $xArtist->getAttribute('type') ) if $xArtist->getAttribute('type');
+   $artist->name( $xName->textContent() ) if $xName;
+   $artist->sort_name( $xSortName->textContent() ) if $xSortName;
+   $artist->disambiguation( $xDisambiguation->textContent() ) if $xDisambiguation;
+   $artist->life_span_begin( $xLifeSpan->getAttribute('begin') ) if $xLifeSpan && $xLifeSpan->getAttribute('begin');
+   $artist->life_span_end( $xLifeSpan->getAttribute('end') ) if $xLifeSpan && $xLifeSpan->getAttribute('end');
+   $artist->score( $xArtist->getAttribute('ext:score') ) if $xArtist->getAttribute('ext:score');
+   $artist->alias_list( $self->_create_alias_list( $xAliasList ) ) if $xAliasList;
+   $artist->relation_list( $self->_create_relation_list( $xRelationList ) ) if $xRelationList;
+   $artist->release_list( $self->_create_release_list( $xReleaseList ) ) if $xReleaseList;
 
    return $artist;
 }
 
 sub _create_artist_list {
-   my $xArtistList = shift;
+   my $self = shift;
+   my ($xArtistList) = @_;
+
+   my $xpc = $self->xpc();
 
    require WebService::MusicBrainz::Response::ArtistList;
 
@@ -280,8 +307,8 @@ sub _create_artist_list {
 
    my @artists;
 
-   foreach my $xArtist ($xArtistList->get_xpath('artist')) {
-       my $artist = _create_artist( $xArtist );
+   foreach my $xArtist ($xpc->findnodes('mmd:artist', $xArtistList)) {
+       my $artist = $self->_create_artist( $xArtist );
 
        push @artists, $artist;
    }
@@ -292,67 +319,87 @@ sub _create_artist_list {
 }
 
 sub _create_release {
-   my $xRelease = shift;
+   my $self = shift;
+   my ($xRelease) = @_;
+
+   my $xpc = $self->xpc();
+
+   my ($xTitle) = $xpc->findnodes('mmd:title[1]', $xRelease);
+   my ($xTextRep) = $xpc->findnodes('mmd:text-representation[1]', $xRelease);
+   my ($xASIN) = $xpc->findnodes('mmd:asin[1]', $xRelease);
+   my ($xArtist) = $xpc->findnodes('mmd:artist[1]', $xRelease);
+   my ($xReleaseEventList) = $xpc->findnodes('mmd:release-event-list[1]', $xRelease);
+   my ($xDiscList) = $xpc->findnodes('mmd:disc-list[1]', $xRelease);
+   my ($xPuidList) = $xpc->findnodes('mmd:puid-list[1]', $xRelease);
+   my ($xTrackList) = $xpc->findnodes('mmd:track-list[1]', $xRelease);
+   my ($xRelationList) = $xpc->findnodes('mmd:relation-list[1]', $xRelease);
 
    require WebService::MusicBrainz::Response::Release;
 
    my $release = WebService::MusicBrainz::Response::Release->new();
 
-   $release->id( $xRelease->att('id') ) if $xRelease->att('id');
-   $release->type( $xRelease->att('type') ) if $xRelease->att('type');
-   $release->title( $xRelease->first_child('title')->text() ) if $xRelease->first_child('title');
-   $release->text_rep_language( $xRelease->first_child('text-representation')->att('language') )
-        if $xRelease->first_child('text-representation') && $xRelease->first_child('text-representation')->att('language');
-   $release->text_rep_script( $xRelease->first_child('text-representation')->att('script') )
-        if $xRelease->first_child('text-representation') && $xRelease->first_child('text-representation')->att('script');
-   $release->asin( $xRelease->first_child('asin')->text() ) if $xRelease->first_child('asin');
-   $release->score( $xRelease->att('ext:score') ) if $xRelease->att('ext:score');
-   $release->artist( _create_artist( $xRelease->first_child('artist') ) ) if $xRelease->first_child('artist');
-   $release->release_event_list( _create_release_event_list( $xRelease->first_child('release-event-list') ) )
-        if $xRelease->first_child('release-event-list');
-   $release->disc_list( _create_disc_list( $xRelease->first_child('disc-list') ) ) if $xRelease->first_child('disc-list');
-   $release->puid_list( _create_puid_list( $xRelease->first_child('puid-list') ) ) if $xRelease->first_child('puid-list');
-   $release->track_list( _create_track_list( $xRelease->first_child('track-list') ) ) if $xRelease->first_child('track-list');
-   $release->relation_list( _create_relation_list( $xRelease->first_child('relation-list') ) )
-        if $xRelease->first_child('relation-list');
+   $release->id( $xRelease->getAttribute('id') ) if $xRelease->getAttribute('id');
+   $release->type( $xRelease->getAttribute('type') ) if $xRelease->getAttribute('type');
+   $release->title( $xTitle->textContent() ) if $xTitle;
+   $release->text_rep_language( $xTextRep->getAttribute('language') ) if $xTextRep && $xTextRep->getAttribute('language');
+   $release->text_rep_script( $xTextRep->getAttribute('script') ) if $xTextRep && $xTextRep->getAttribute('script');
+   $release->asin( $xASIN->textContent() ) if $xASIN;
+   $release->score( $xRelease->getAttribute('ext:score') ) if $xRelease->getAttribute('ext:score');
+   $release->artist( $self->_create_artist( $xArtist ) ) if $xArtist;
+   $release->release_event_list( $self->_create_release_event_list( $xReleaseEventList ) ) if $xReleaseEventList;
+   $release->disc_list( $self->_create_disc_list( $xDiscList ) ) if $xDiscList;
+   $release->puid_list( $self->_create_puid_list( $xPuidList ) ) if $xPuidList;
+   $release->track_list( $self->_create_track_list( $xTrackList ) ) if $xTrackList;
+   $release->relation_list( $self->_create_relation_list( $xRelationList ) ) if $xRelationList;
 
    return $release;
 }
 
 sub _create_track {
-   my $xTrack = shift;
+   my $self = shift;
+   my ($xTrack) = @_;
+
+   my $xpc = $self->xpc();
+
+   my ($xTitle) = $xpc->findnodes('mmd:title[1]', $xTrack);
+   my ($xDuration) = $xpc->findnodes('mmd:duration[1]', $xTrack);
+   my ($xArtist) = $xpc->findnodes('mmd:artist[1]', $xTrack);
+   my ($xReleaseList) = $xpc->findnodes('mmd:release-list[1]', $xTrack);
+   my ($xPuidList) = $xpc->findnodes('mmd:puid-list[1]', $xTrack);
+   my ($xRelationList) = $xpc->findnodes('mmd:relation-list[1]', $xTrack);
 
    require WebService::MusicBrainz::Response::Track;
 
    my $track= WebService::MusicBrainz::Response::Track->new();
 
-   $track->id( $xTrack->att('id') ) if $xTrack->att('id');
-   $track->title( $xTrack->first_child('title')->text() ) if $xTrack->first_child('title');
-   $track->duration( $xTrack->first_child('duration')->text() ) if $xTrack->first_child('duration');
-   $track->score( $xTrack->att('ext:score') ) if $xTrack->att('ext:score');
-   $track->artist( _create_artist( $xTrack->first_child('artist') ) ) if $xTrack->first_child('artist');
-   $track->release_list( _create_release_list( $xTrack->first_child('release-list') ) )
-        if $xTrack->first_child('release-list');
-   $track->puid_list( _create_puid_list( $xTrack->first_child('puid-list') ) ) if $xTrack->first_child('puid-list');
-   $track->relation_list( _create_relation_list( $xTrack->first_child('relation-list') ) )
-        if $xTrack->first_child('relation-list');
+   $track->id( $xTrack->getAttribute('id') ) if $xTrack->getAttribute('id');
+   $track->title( $xTitle->textContent() ) if $xTitle;
+   $track->duration( $xDuration->textContent() ) if $xDuration;
+   $track->score( $xTrack->getAttribute('ext:score') ) if $xTrack->getAttribute('ext:score');
+   $track->artist( $self->_create_artist( $xArtist ) ) if $xArtist;
+   $track->release_list( $self->_create_release_list( $xReleaseList ) ) if $xReleaseList;
+   $track->puid_list( $self->_create_puid_list( $xPuidList ) ) if $xPuidList;
+   $track->relation_list( $self->_create_relation_list( $xRelationList ) ) if $xRelationList;
 
    return $track;
 }
 
 sub _create_track_list {
-   my $xTrackList = shift;
+   my $self = shift;
+   my ($xTrackList) = @_;
+
+   my $xpc = $self->xpc();
 
    require WebService::MusicBrainz::Response::TrackList;
 
    my $track_list = WebService::MusicBrainz::Response::TrackList->new();
 
-   $track_list->count( $xTrackList->att('count') ) if $xTrackList->att('count');
+   $track_list->count( $xTrackList->getAttribute('count') ) if $xTrackList->getAttribute('count');
 
    my @tracks;
 
-   foreach my $xTrack ($xTrackList->get_xpath('track')) {
-       my $track = _create_track( $xTrack );
+   foreach my $xTrack ($xpc->findnodes('mmd:track', $xTrackList)) {
+       my $track = $self->_create_track( $xTrack );
        push @tracks, $track;
    }
 
@@ -368,26 +415,29 @@ sub _create_alias {
 
    my $alias = WebService::MusicBrainz::Response::Alias->new();
 
-   $alias->type( $xAlias->att('type') ) if $xAlias->att('type');
-   $alias->script( $xAlias->att('script') ) if $xAlias->att('script');
-   $alias->text( $xAlias->text() ) if $xAlias->text();
+   $alias->type( $xAlias->getAttribute('type') ) if $xAlias->getAttribute('type');
+   $alias->script( $xAlias->getAttribute('script') ) if $xAlias->getAttribute('script');
+   $alias->text( $xAlias->textContent() ) if $xAlias->textContent();
 
    return $alias;
 }
 
 sub _create_alias_list {
-   my $xAliasList = shift;
+   my $self = shift;
+   my ($xAliasList) = @_;
+
+   my $xpc = $self->xpc();
 
    require WebService::MusicBrainz::Response::AliasList;
 
    my $alias_list = WebService::MusicBrainz::Response::AliasList->new();
 
-   $alias_list->count( $xAliasList->att('count') ) if $xAliasList->att('count');
-   $alias_list->offset( $xAliasList->att('offset') ) if $xAliasList->att('offset');
+   $alias_list->count( $xAliasList->getAttribute('count') ) if $xAliasList->getAttribute('count');
+   $alias_list->offset( $xAliasList->getAttribute('offset') ) if $xAliasList->getAttribute('offset');
 
    my @aliases;
 
-   foreach my $xAlias ($xAliasList->get_xpath('alias')) {
+   foreach my $xAlias ($xpc->findnodes('mmd:alias', $xAliasList)) {
        my $alias = _create_alias($xAlias);
 
        push @aliases, $alias if defined($alias);
@@ -399,41 +449,51 @@ sub _create_alias_list {
 }
 
 sub _create_relation {
-   my $xRelation = shift;
+   my $self = shift;
+   my ($xRelation) = @_;
+
+   my $xpc = $self->xpc();
+
+   my ($xArtist) = $xpc->findnodes('mmd:artist[1]', $xRelation);
+   my ($xRelease) = $xpc->findnodes('mmd:release[1]', $xRelation);
+   my ($xTrack) = $xpc->findnodes('mmd:track[1]', $xRelation);
 
    require WebService::MusicBrainz::Response::Relation;
 
    my $relation = WebService::MusicBrainz::Response::Relation->new();
 
-   $relation->type( $xRelation->att('type') ) if $xRelation->att('type');
-   $relation->target( $xRelation->att('target') ) if $xRelation->att('target');
-   $relation->direction( $xRelation->att('direction') ) if $xRelation->att('direction');
-   $relation->attributes( $xRelation->att('attributes') ) if $xRelation->att('attributes');
-   $relation->begin( $xRelation->att('begin') ) if $xRelation->att('begin');
-   $relation->end( $xRelation->att('end') ) if $xRelation->att('end');
-   $relation->score( $xRelation->att('ext:score') ) if $xRelation->att('ext:score');
-   $relation->artist( _create_artist( $xRelation->first_child('artist') ) ) if $xRelation->first_child('artist');
-   $relation->release( _create_release( $xRelation->first_child('release') ) ) if $xRelation->first_child('release');
-   $relation->track( _create_track( $xRelation->first_child('track') ) ) if $xRelation->first_child('relation');
+   $relation->type( $xRelation->getAttribute('type') ) if $xRelation->getAttribute('type');
+   $relation->target( $xRelation->getAttribute('target') ) if $xRelation->getAttribute('target');
+   $relation->direction( $xRelation->getAttribute('direction') ) if $xRelation->getAttribute('direction');
+   $relation->getAttributeributes( $xRelation->getAttribute('attributes') ) if $xRelation->getAttribute('attributes');
+   $relation->begin( $xRelation->getAttribute('begin') ) if $xRelation->getAttribute('begin');
+   $relation->end( $xRelation->getAttribute('end') ) if $xRelation->getAttribute('end');
+   $relation->score( $xRelation->getAttribute('ext:score') ) if $xRelation->getAttribute('ext:score');
+   $relation->artist( $self->_create_artist( $xArtist ) ) if $xArtist;
+   $relation->release( $self->_create_release( $xRelease ) ) if $xRelease;
+   $relation->track( $self->_create_track( $xTrack ) ) if $xTrack;
 
    return $relation;
 }
 
 sub _create_relation_list {
-   my $xRelationList = shift;
+   my $self = shift;
+   my ($xRelationList) = @_;
+
+   my $xpc = $self->xpc();
 
    require WebService::MusicBrainz::Response::RelationList;
 
    my $relation_list = WebService::MusicBrainz::Response::RelationList->new();
 
-   $relation_list->target_type( $xRelationList->att('target-type') ) if $xRelationList->att('target-type');
-   $relation_list->count( $xRelationList->att('count') ) if $xRelationList->att('count');
-   $relation_list->offset( $xRelationList->att('offset') ) if $xRelationList->att('offset');
+   $relation_list->target_type( $xRelationList->getAttribute('target-type') ) if $xRelationList->getAttribute('target-type');
+   $relation_list->count( $xRelationList->getAttribute('count') ) if $xRelationList->getAttribute('count');
+   $relation_list->offset( $xRelationList->getAttribute('offset') ) if $xRelationList->getAttribute('offset');
 
    my @relations;
 
-   foreach my $xRelation ($xRelationList->get_xpath('relation')) {
-       my $relation = _create_relation($xRelation);
+   foreach my $xRelation ($xpc->findnodes('mmd:relation', $xRelationList)) {
+       my $relation = $self->_create_relation($xRelation);
 
        push @relations, $relation if defined($relation);
    }
@@ -444,20 +504,24 @@ sub _create_relation_list {
 }
 
 sub _create_event {
-   my $xEvent = shift;
+   my $self = shift;
+   my ($xEvent) = @_;
 
    require WebService::MusicBrainz::Response::ReleaseEvent;
 
    my $event = WebService::MusicBrainz::Response::ReleaseEvent->new();
 
-   $event->date( $xEvent->att('date') ) if $xEvent->att('date');
-   $event->country( $xEvent->att('country') ) if $xEvent->att('country');
+   $event->date( $xEvent->getAttribute('date') ) if $xEvent->getAttribute('date');
+   $event->country( $xEvent->getAttribute('country') ) if $xEvent->getAttribute('country');
 
    return $event;
 }
 
 sub _create_release_event_list {
-   my $xReleaseEventList = shift;
+   my $self = shift;
+   my ($xReleaseEventList) = @_;
+
+   my $xpc = $self->xpc();
 
    require WebService::MusicBrainz::Response::ReleaseEventList;
 
@@ -465,8 +529,8 @@ sub _create_release_event_list {
 
    my @events;
 
-   foreach my $xEvent ($xReleaseEventList->get_xpath('event')) {
-       my $event = _create_event( $xEvent );
+   foreach my $xEvent ($xpc->findnodes('mmd:event', $xReleaseEventList)) {
+       my $event = $self->_create_event( $xEvent );
        push @events, $event;
    }
 
@@ -476,19 +540,22 @@ sub _create_release_event_list {
 }
 
 sub _create_release_list {
-   my $xReleaseList = shift;
+   my $self = shift;
+   my ($xReleaseList) = @_;
+
+   my $xpc = $self->xpc();
 
    require WebService::MusicBrainz::Response::ReleaseList;
 
    my $release_list = WebService::MusicBrainz::Response::ReleaseList->new();
 
-   $release_list->count( $xReleaseList->att('count') ) if $xReleaseList->att('count');
-   $release_list->offset( $xReleaseList->att('offset') ) if $xReleaseList->att('offset');
+   $release_list->count( $xReleaseList->getAttribute('count') ) if $xReleaseList->getAttribute('count');
+   $release_list->offset( $xReleaseList->getAttribute('offset') ) if $xReleaseList->getAttribute('offset');
 
    my @releases;
 
-   foreach my $xRelease ($xReleaseList->get_xpath('release')) {
-       my $release = _create_release($xRelease);
+   foreach my $xRelease ($xpc->findnodes('mmd:release', $xReleaseList)) {
+       my $release = $self->_create_release($xRelease);
 
        push @releases, $release if defined($release);
    }
@@ -499,20 +566,24 @@ sub _create_release_list {
 }
 
 sub _create_disc {
-   my $xDisc = shift;
+   my $self = shift;
+   my ($xDisc) = @_;
 
    require WebService::MusicBrainz::Response::Disc;
 
    my $disc = WebService::MusicBrainz::Response::Disc->new();
 
-   $disc->id( $xDisc->att('id') ) if $xDisc->att('id');
-   $disc->sectors( $xDisc->att('sectors') ) if $xDisc->att('sectors');
+   $disc->id( $xDisc->getAttribute('id') ) if $xDisc->getAttribute('id');
+   $disc->sectors( $xDisc->getAttribute('sectors') ) if $xDisc->getAttribute('sectors');
 
    return $disc;
 }
 
 sub _create_disc_list {
-   my $xDiscList = shift;
+   my $self = shift;
+   my ($xDiscList) = @_;
+
+   my $xpc = $self->xpc();
 
    require WebService::MusicBrainz::Response::DiscList;
 
@@ -520,10 +591,10 @@ sub _create_disc_list {
 
    my @discs;
 
-   $disc_list->count( $xDiscList->att('count') ) if $xDiscList->att('count');
+   $disc_list->count( $xDiscList->getAttribute('count') ) if $xDiscList->getAttribute('count');
 
-   foreach my $xDisc ($xDiscList->get_xpath('disc')) {
-      my $disc = _create_disc( $xDisc );
+   foreach my $xDisc ($xpc->findnodes('mmd:disc', $xDiscList)) {
+      my $disc = $self->_create_disc( $xDisc );
       push @discs, $disc;
    }
 
@@ -533,19 +604,23 @@ sub _create_disc_list {
 }
 
 sub _create_puid {
-   my $xPuid = shift;
+   my $self = shift;
+   my ($xPuid) = @_;
 
    require WebService::MusicBrainz::Response::Puid;
 
    my $puid = WebService::MusicBrainz::Response::Puid->new();
 
-   $puid->id( $xPuid->att('id') ) if $xPuid->att('id');
+   $puid->id( $xPuid->getAttribute('id') ) if $xPuid->getAttribute('id');
 
    return $puid;
 }
 
 sub _create_puid_list {
-   my $xPuidList = shift;
+   my $self = shift;
+   my ($xPuidList) = @_;
+
+   my $xpc = $self->xpc();
 
    require WebService::MusicBrainz::Response::PuidList;
 
@@ -553,7 +628,7 @@ sub _create_puid_list {
 
    my @puids;
 
-   foreach my $xPuid ($xPuidList->get_xpath('puid')) {
+   foreach my $xPuid ($xpc->findnodes('mmd:puid', $xPuidList)) {
        my $puid = _create_puid( $xPuid );
        push @puids, $puid;
    }
@@ -573,7 +648,7 @@ sub _create_puid_list {
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2006 by Bob Faist
+Copyright 2006-2007 by Bob Faist
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
