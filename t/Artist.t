@@ -5,7 +5,7 @@
 
 # change 'tests => 1' to 'tests => last_test_to_print';
 
-use Test::More tests => 54;
+use Test::More tests => 58;
 BEGIN { use_ok('WebService::MusicBrainz::Artist') };
 
 #########################
@@ -181,4 +181,19 @@ foreach my $release (@{ $va_album_vartist_search_artist_release_list->releases()
        ok( $release->type() eq "Soundtrack Official", 'check INC va_soundtrack release type' );
        ok( $release->title() eq "Elizabethtown", 'chck INC va_soundtrack release title' );
     }
+}
+
+my $offset_artist_search = $ws->search({ NAME => 'beatles', OFFSET => 3 });
+
+ok( $offset_artist_search );
+
+my $offset_artist_list = $offset_artist_search->artist_list();
+
+ok( $offset_artist_list->offset() eq "3" );
+ok( $offset_artist_list->count() eq "9" );
+
+foreach my $artist (@{ $offset_artist_list->artists() }) {
+   if($artist->id() eq "1e366399-4cf7-427d-94bc-4736ec3959ff") {
+       ok($artist->name() eq "The Exotic Beatles");
+   }
 }

@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Track;
 use strict;
 use WebService::MusicBrainz::Query;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 =head1 NAME
 
@@ -51,7 +51,7 @@ sub _init {
 
    my $q = WebService::MusicBrainz::Query->new();
 
-   $q->set_url_params(qw/mbid title artist release duration tracknum artistid releaseid puid limit/);
+   $q->set_url_params(qw/mbid title artist release duration tracknum artistid releaseid puid limit offset/);
    $q->set_inc_params(qw/artist releases puids artist-rels release-rels track-rels url-rels/);
 
    $self->{_query} = $q;
@@ -77,6 +77,7 @@ define the search parameters.
     my $ws = WebService::MusicBrainz::Track->new();
     
     $ws->search({ TITLE => 'when the stars go blue' });
+    $ws->search({ TITLE => 'blue', OFFSET => 100 });
     $ws->search({ ARTIST => 'Ryan Adams', TITLE => 'when the stars go blue' });
     $ws->search({ RELEASE => 'Gold', TITLE => 'when the stars go blue' });
     $ws->search({ DURATION => 200000, TITLE => 'when the stars go blue' });

@@ -5,7 +5,7 @@
 
 # change 'tests => 1' to 'tests => last_test_to_print';
 
-use Test::More tests => 16;
+use Test::More tests => 19;
 BEGIN { use_ok('WebService::MusicBrainz::Track') };
 
 #########################
@@ -67,5 +67,12 @@ ok( $search_inc_track_rels );
 
 my $search_inc_urls_rels = $ws->search({ MBID => 'bd08eddf-b811-4653-b56b-892292c291bc', INC => 'url-rels' });
 ok( $search_inc_urls_rels );
+
+my $offset_track_search = $ws->search({ TITLE => "Blue", OFFSET => 1000 });
+ok( $offset_track_search );
+
+my $offset_track_list = $offset_track_search->track_list();
+ok( $offset_track_list->offset() eq "1000" );
+ok( $offset_track_list->count() > 25000 );
 
 # TEST RESPONSE OBJECT API

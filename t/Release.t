@@ -5,7 +5,7 @@
 
 # change 'tests => 1' to 'tests => last_test_to_print';
 
-use Test::More tests => 39;
+use Test::More tests => 46;
 BEGIN { use_ok('WebService::MusicBrainz::Release') };
 
 #########################
@@ -130,3 +130,11 @@ ok( $search_inc_track_rels );
 
 my $search_inc_url_rels = $ws->search({ MBID => 'fed37cfc-2a6d-4569-9ac0-501a7c7598eb', INC => 'url-rels' });
 ok( $search_inc_url_rels );
+
+my $offset_release_search = $ws->search({ ARTIST => "Nickel Creek", OFFSET => 3 });
+ok( $offset_release_search );
+
+my $offset_release_list = $offset_release_search->release_list();
+ok( $offset_release_list->offset() eq "3" );
+ok( $offset_release_list->count() eq "9" );
+ok( scalar(@{ $offset_release_list->releases() }) == 6);

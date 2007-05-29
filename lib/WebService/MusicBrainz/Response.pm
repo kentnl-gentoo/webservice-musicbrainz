@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Response;
 use strict;
 use XML::LibXML;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 =head1 NAME
 
@@ -305,6 +305,9 @@ sub _create_artist_list {
 
    my $artist_list = WebService::MusicBrainz::Response::ArtistList->new();
 
+   $artist_list->count( $xArtistList->getAttribute('count') ) if $xArtistList->getAttribute('count');
+   $artist_list->offset( $xArtistList->getAttribute('offset') ) if $xArtistList->getAttribute('offset');
+
    my @artists;
 
    foreach my $xArtist ($xpc->findnodes('mmd:artist', $xArtistList)) {
@@ -395,6 +398,7 @@ sub _create_track_list {
    my $track_list = WebService::MusicBrainz::Response::TrackList->new();
 
    $track_list->count( $xTrackList->getAttribute('count') ) if $xTrackList->getAttribute('count');
+   $track_list->offset( $xTrackList->getAttribute('offset') ) if $xTrackList->getAttribute('offset');
 
    my @tracks;
 
@@ -527,6 +531,9 @@ sub _create_release_event_list {
 
    my $release_event_list = WebService::MusicBrainz::Response::ReleaseEventList->new();
 
+   $release_event_list->count( $xReleaseEventList->getAttribute('count') ) if $xReleaseEventList->getAttribute('count');
+   $release_event_list->offset( $xReleaseEventList->getAttribute('offset') ) if $xReleaseEventList->getAttribute('offset');
+
    my @events;
 
    foreach my $xEvent ($xpc->findnodes('mmd:event', $xReleaseEventList)) {
@@ -592,6 +599,7 @@ sub _create_disc_list {
    my @discs;
 
    $disc_list->count( $xDiscList->getAttribute('count') ) if $xDiscList->getAttribute('count');
+   $disc_list->offset( $xDiscList->getAttribute('offset') ) if $xDiscList->getAttribute('offset');
 
    foreach my $xDisc ($xpc->findnodes('mmd:disc', $xDiscList)) {
       my $disc = $self->_create_disc( $xDisc );
@@ -625,6 +633,9 @@ sub _create_puid_list {
    require WebService::MusicBrainz::Response::PuidList;
 
    my $puid_list = WebService::MusicBrainz::Response::PuidList->new();
+
+   $puid_list->count( $xPuidList->getAttribute('count') ) if $xPuidList->getAttribute('count');
+   $puid_list->offset( $xPuidList->getAttribute('offset') ) if $xPuidList->getAttribute('offset');
 
    my @puids;
 

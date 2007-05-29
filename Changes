@@ -32,3 +32,13 @@ Revision history for Perl extension WebService::MusicBrainz.
 
 0.08 Web Apr 25 2007
 	- Another test was failing due to data change.
+
+0.09 Sun May 13 2007
+        - Switched XML parsing from XML::Twig to XML::LibXML
+	- Converted packaging to Module::Build with ExtUtils::MakeMaker compatibility
+        - Fixed failing test in Release.t
+
+0.10 Mon May 28 2007
+	- RT Bug 27287 fix (Ron Kuper)
+	- More tests to check offsets are usable
+	- Set user agent string

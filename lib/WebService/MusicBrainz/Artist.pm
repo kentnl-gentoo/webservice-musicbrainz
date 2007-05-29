@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Artist;
 use strict;
 use WebService::MusicBrainz::Query;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 =head1 NAME
 
@@ -53,7 +53,7 @@ sub _init {
 
    my $q = WebService::MusicBrainz::Query->new(@_);
 
-   $q->set_url_params(qw/mbid name limit/);
+   $q->set_url_params(qw/mbid name limit offset/);
    $q->set_inc_params(qw/aliases artist-rels release-rels track-rels url-rels sa- va-/);
 
    $self->{_query} = $q;
@@ -81,6 +81,7 @@ response object.
     my $response = $ws->search({ MBID => 'd15721d8-56b4-453d-b506-fc915b14cba2' });
     my $response = $ws->search({ NAME => 'throwing muses' });
     my $response = $ws->search({ NAME => 'james', LIMIT => 5 });
+    my $response = $ws->search({ NAME => 'beatles', OFFSET => 5 });
     my $response = $ws->search({ MBID => '65f4f0c5-ef9e-490c-aee3-909e7ae6b2ab', INC => 'aliases' });
     my $response = $ws->search({ MBID => '65f4f0c5-ef9e-490c-aee3-909e7ae6b2ab', INC => 'artist-rels' });
     my $response = $ws->search({ MBID => '65f4f0c5-ef9e-490c-aee3-909e7ae6b2ab', INC => 'release-rels' });

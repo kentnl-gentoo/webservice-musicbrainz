@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Release;
 use strict;
 use WebService::MusicBrainz::Query;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 =head1 NAME
 
@@ -49,7 +49,7 @@ sub _init {
 
    my $q = WebService::MusicBrainz::Query->new();
 
-   $q->set_url_params(qw/mbid title discid artist artistid releasetypes limit/);
+   $q->set_url_params(qw/mbid title discid artist artistid releasetypes limit offset/);
    $q->set_inc_params(qw/artist counts release-events discs tracks artist-rels release-rels track-rels url-rels/);
 
    $self->{_query} = $q;
@@ -76,6 +76,7 @@ to define the search parameters.
     
     my $response = $ws->search({ TITLE => 'Highway to Hell' });
     my $response = $ws->search({ ARTIST => 'sleater kinney' });
+    my $response = $ws->search({ ARTIST => 'beatles', OFFSET => 4 });
     my $response = $ws->search({ ARTISTID => '65f4f0c5-ef9e-490c-aee3-909e7ae6b2ab' });
     my $response = $ws->search({ DISCID => 'XgrrQ8Npf9Uz_trPIFMrSz6Mk6Q-' });
     my $response = $ws->search({ RELEASETYPES => 'Official', MBID => 'a89e1d92-5381-4dab-ba51-733137d0e431' });

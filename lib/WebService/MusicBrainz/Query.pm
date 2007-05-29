@@ -5,7 +5,7 @@ use LWP::UserAgent;
 use URI;
 use WebService::MusicBrainz::Response;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 =head1 NAME
 
@@ -124,6 +124,8 @@ sub get {
    my $url = $self->_url($class, $params);
    
    my $ua = LWP::UserAgent->new();
+
+   $ua->agent("WebService::MusicBrainz/$VERSION");
 
    my $response = $ua->get($url);
 
