@@ -136,5 +136,5 @@ ok( $offset_release_search );
 
 my $offset_release_list = $offset_release_search->release_list();
 ok( $offset_release_list->offset() eq "3" );
-ok( $offset_release_list->count() eq "9" );
-ok( scalar(@{ $offset_release_list->releases() }) == 6);
+ok( $offset_release_list->count() eq "10" );
+ok( scalar(@{ $offset_release_list->releases() }) == 7);

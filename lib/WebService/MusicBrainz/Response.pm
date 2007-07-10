@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Response;
 use strict;
 use XML::LibXML;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 =head1 NAME
 
@@ -211,7 +211,7 @@ sub track {
 
    my $track = $metadata->track_list() ? shift @{ $metadata->track_list()->tracks() } : $metadata->track();
 
-   return $metadata->track();
+   return $track;
 }
 
 =head2 artist_list()

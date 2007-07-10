@@ -42,3 +42,8 @@ Revision history for Perl extension WebService::MusicBrainz.
 	- RT Bug 27287 fix (Ron Kuper)
 	- More tests to check offsets are usable
 	- Set user agent string
+
+0.11 Mon Jul 9 2007
+	- LWP::UserAgent proxy enabled - Michael Ablassmeier
+	- Fix bug with Response.pm - Michael Ablassmeier
+	- Fixed failing tests in Release.t
