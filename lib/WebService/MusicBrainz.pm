@@ -2,7 +2,7 @@ package WebService::MusicBrainz;
 
 use strict;
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 =head1 NAME
 
@@ -15,6 +15,7 @@ WebService::MusicBrainz
     my $artist_ws = WebService::MusicBrainz->new_artist();
     my $track_ws = WebService::MusicBrainz->new_track();
     my $release_ws = WebService::MusicBrainz->new_release();
+    my $label_ws = WebService::MusicBrainz->new_label();
 
 =head1 DESCRIPTION
 
@@ -62,6 +63,20 @@ sub new_release {
    require WebService::MusicBrainz::Release;
 
    return WebService::MusicBrainz::Release->new();
+}
+
+=head2 new_release
+
+Return new instance of WebService::MusicBrainz::Label object.
+
+=cut 
+
+sub new_label {
+   my $class = shift;
+
+   require WebService::MusicBrainz::Label;
+
+   return WebService::MusicBrainz::Label->new();
 }
 
 =head1 AUTHOR

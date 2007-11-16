@@ -47,3 +47,8 @@ Revision history for Perl extension WebService::MusicBrainz.
 	- LWP::UserAgent proxy enabled - Michael Ablassmeier
 	- Fix bug with Response.pm - Michael Ablassmeier
 	- Fixed failing tests in Release.t
+
+0.12 Thu Nov 15 2007
+	- More compliant with 1.2 MMD Schema
+	- Added "label" support and test cases
+	- Fixed test case count in Release.t

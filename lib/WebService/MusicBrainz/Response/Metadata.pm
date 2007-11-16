@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Response::Metadata;
 use strict;
 use base 'Class::Accessor';
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 =head1 NAME
 
@@ -37,7 +37,7 @@ All the methods listed below are accessor methods.  They can take a scalar argum
 
 =cut
 
-__PACKAGE__->mk_accessors(qw/generator created artist release track artist_list release_list track_list score/);
+__PACKAGE__->mk_accessors(qw/generator created artist release track label artist_list release_list track_list label_list score/);
 
 =head1 AUTHOR
 

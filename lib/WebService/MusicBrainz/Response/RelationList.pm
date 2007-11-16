@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Response::RelationList;
 use strict;
 use base 'Class::Accessor';
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 =head1 NAME
 

@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Response;
 use strict;
 use XML::LibXML;
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 =head1 NAME
 
@@ -92,6 +92,8 @@ sub _init {
    my ($xReleaseList) = $xpc->findnodes('mmd:release-list[1]');
    my ($xTrack) = $xpc->findnodes('mmd:track[1]');
    my ($xTrackList) = $xpc->findnodes('mmd:track-list[1]');
+   my ($xLabel) = $xpc->findnodes('mmd:label[1]');
+   my ($xLabelList) = $xpc->findnodes('mmd:label-list[1]');
 
    require WebService::MusicBrainz::Response::Metadata;
 
@@ -106,6 +108,8 @@ sub _init {
    $metadata->release_list( $self->_create_release_list( $xReleaseList ) ) if $xReleaseList;
    $metadata->track( $self->_create_track( $xTrack ) ) if $xTrack;
    $metadata->track_list( $self->_create_track_list( $xTrackList ) ) if $xTrackList;
+   $metadata->label( $self->_create_label( $xLabel ) ) if $xLabel;
+   $metadata->label_list( $self->_create_label_list( $xLabelList ) ) if $xLabelList;
 
    $self->{_metadata_cache} = $metadata;
 }
@@ -214,6 +218,22 @@ sub track {
    return $track;
 }
 
+=head2 label()
+
+This method will return an Response::Label object.
+
+=cut
+
+sub label {
+   my $self = shift;
+
+   my $metadata = $self->{_metadata_cache};
+
+   my $label = $metadata->label_list() ? shift @{ $metadata->label_list()->labels() } : $metadata->label();
+
+   return $label;
+}
+
 =head2 artist_list()
 
 This method will return a reference to the Response::ArtistList object in a scalar context.  If in a array context, an array of Response::Artist objects will be returned.
@@ -262,6 +282,22 @@ sub track_list {
    return wantarray ? @{ $track_list->tracks() } : $track_list;
 }
 
+=head2 label_list()
+
+This method will return a reference to the Response::LabelList object in a scalar context.  If in a array context, an array of Response::Label objects will be returned.
+
+=cut
+
+sub label_list {
+   my $self = shift;
+
+   my $metadata = $self->{_metadata_cache};
+
+   my $label_list = $metadata->label_list();
+
+   return wantarray ? @{ $label_list->labels() } : $label_list;
+}
+
 sub _create_artist {
    my $self = shift;
    my ($xArtist) = @_;
@@ -275,6 +311,7 @@ sub _create_artist {
    my ($xAliasList) = $xpc->findnodes('mmd:alias-list[1]', $xArtist);
    my ($xRelationList) = $xpc->findnodes('mmd:relation-list[1]', $xArtist);
    my ($xReleaseList) = $xpc->findnodes('mmd:release-list[1]', $xArtist);
+   my ($xTagList) = $xpc->findnodes('mmd:tag-list[1]', $xArtist);
 
    require WebService::MusicBrainz::Response::Artist;
 
@@ -291,6 +328,7 @@ sub _create_artist {
    $artist->alias_list( $self->_create_alias_list( $xAliasList ) ) if $xAliasList;
    $artist->relation_list( $self->_create_relation_list( $xRelationList ) ) if $xRelationList;
    $artist->release_list( $self->_create_release_list( $xReleaseList ) ) if $xReleaseList;
+   $artist->tag_list( $self->_create_tag_list( $xTagList ) ) if $xTagList;
 
    return $artist;
 }
@@ -336,6 +374,7 @@ sub _create_release {
    my ($xPuidList) = $xpc->findnodes('mmd:puid-list[1]', $xRelease);
    my ($xTrackList) = $xpc->findnodes('mmd:track-list[1]', $xRelease);
    my ($xRelationList) = $xpc->findnodes('mmd:relation-list[1]', $xRelease);
+   my ($xTagList) = $xpc->findnodes('mmd:tag-list[1]', $xRelease);
 
    require WebService::MusicBrainz::Response::Release;
 
@@ -354,6 +393,7 @@ sub _create_release {
    $release->puid_list( $self->_create_puid_list( $xPuidList ) ) if $xPuidList;
    $release->track_list( $self->_create_track_list( $xTrackList ) ) if $xTrackList;
    $release->relation_list( $self->_create_relation_list( $xRelationList ) ) if $xRelationList;
+   $release->tag_list( $self->_create_tag_list( $xTagList ) ) if $xTagList;
 
    return $release;
 }
@@ -370,6 +410,7 @@ sub _create_track {
    my ($xReleaseList) = $xpc->findnodes('mmd:release-list[1]', $xTrack);
    my ($xPuidList) = $xpc->findnodes('mmd:puid-list[1]', $xTrack);
    my ($xRelationList) = $xpc->findnodes('mmd:relation-list[1]', $xTrack);
+   my ($xTagList) = $xpc->findnodes('mmd:tag-list[1]', $xTrack);
 
    require WebService::MusicBrainz::Response::Track;
 
@@ -383,8 +424,73 @@ sub _create_track {
    $track->release_list( $self->_create_release_list( $xReleaseList ) ) if $xReleaseList;
    $track->puid_list( $self->_create_puid_list( $xPuidList ) ) if $xPuidList;
    $track->relation_list( $self->_create_relation_list( $xRelationList ) ) if $xRelationList;
+   $track->tag_list( $self->_create_tag_list( $xTagList ) ) if $xTagList;
 
    return $track;
+}
+
+sub _create_label {
+   my $self = shift;
+   my ($xLabel) = @_;
+
+   my $xpc = $self->xpc();
+
+   my ($xName) = $xpc->findnodes('mmd:name[1]', $xLabel);
+   my ($xSortName) = $xpc->findnodes('mmd:sort-name[1]', $xLabel);
+   my ($xLabelCode) = $xpc->findnodes('mmd:label-code[1]', $xLabel);
+   my ($xDisambiguation) = $xpc->findnodes('mmd:disambiguation[1]', $xLabel);
+   my ($xCountry) = $xpc->findnodes('mmd:country[1]', $xLabel);
+   my ($xLifeSpan) = $xpc->findnodes('mmd:life-span[1]', $xLabel);
+   my ($xAliasList) = $xpc->findnodes('mmd:alias-list[1]', $xLabel);
+   my ($xReleaseList) = $xpc->findnodes('mmd:release-list[1]', $xLabel);
+   my ($xRelationList) = $xpc->findnodes('mmd:relation-list[1]', $xLabel);
+   my ($xTagList) = $xpc->findnodes('mmd:tag-list[1]', $xLabel);
+
+   require WebService::MusicBrainz::Response::Label;
+
+   my $label= WebService::MusicBrainz::Response::Label->new();
+
+   $label->id( $xLabel->getAttribute('id') ) if $xLabel->getAttribute('id');
+   $label->type( $xLabel->getAttribute('type') ) if $xLabel->getAttribute('type');
+   $label->name( $xName->textContent() ) if $xName;
+   $label->sort_name( $xSortName->textContent() ) if $xSortName;
+   $label->label_code( $xLabelCode->textContent() ) if $xLabelCode;
+   $label->disambiguation( $xDisambiguation->textContent() ) if $xDisambiguation;
+   $label->country( $xCountry->textContent() ) if $xCountry;
+   $label->life_span_begin( $xLifeSpan->getAttribute('begin') ) if $xLifeSpan;
+   $label->life_span_end( $xLifeSpan->getAttribute('end') ) if $xLifeSpan;
+   $label->score( $xLabel->getAttribute('ext:score') ) if $xLabel->getAttribute('ext:score');
+   $label->alias_list( $self->_create_alias_list( $xAliasList ) ) if $xAliasList;
+   $label->release_list( $self->_create_release_list( $xReleaseList ) ) if $xReleaseList;
+   $label->relation_list( $self->_create_relation_list( $xRelationList ) ) if $xRelationList;
+   $label->tag_list( $self->_create_tag_list( $xTagList ) ) if $xTagList;
+   
+   return $label;
+}
+
+sub _create_label_list {
+   my $self = shift;
+   my ($xLabelList) = @_;
+
+   my $xpc = $self->xpc();
+
+   require WebService::MusicBrainz::Response::LabelList;
+
+   my $label_list = WebService::MusicBrainz::Response::LabelList->new();
+
+   $label_list->count( $xLabelList->getAttribute('count') ) if $xLabelList->getAttribute('count');
+   $label_list->offset( $xLabelList->getAttribute('offset') ) if $xLabelList->getAttribute('offset');
+   
+   my @labels;
+
+   foreach my $xLabel ($xpc->findnodes('mmd:label', $xLabelList)) {
+       my $label = $self->_create_label( $xLabel );
+       push @labels, $label;
+   }
+
+   $label_list->labels( \@labels );
+
+   return $label_list;
 }
 
 sub _create_track_list {
@@ -647,6 +753,44 @@ sub _create_puid_list {
    $puid_list->puids( \@puids );
 
    return $puid_list;
+}
+
+sub _create_tag {
+   my $self = shift;
+   my ($xTag) = @_;
+
+   require WebService::MusicBrainz::Response::Tag;
+
+   my $tag = WebService::MusicBrainz::Response::Tag->new();
+
+   $tag->id( $xTag->getAttribute('id') ) if $xTag->getAttribute('id');
+
+   return $tag;
+}
+
+sub _create_tag_list {
+   my $self = shift;
+   my ($xTagList) = @_;
+
+   my $xpc = $self->xpc();
+
+   require WebService::MusicBrainz::Response::TagList;
+
+   my $tag_list = WebService::MusicBrainz::Response::TagList->new();
+
+   $tag_list->count( $xTagList->getAttribute('count') ) if $xTagList->getAttribute('count');
+   $tag_list->offset( $xTagList->getAttribute('offset') ) if $xTagList->getAttribute('offset');
+
+   my @tags;
+
+   foreach my $xTag ($xpc->findnodes('mmd:tag', $xTagList)) {
+       my $tag = _create_tag( $xTag );
+       push @tags, $tag;
+   }
+
+   $tag_list->tags( \@tags );
+
+   return $tag_list;
 }
 
 =head1 AUTHOR

@@ -5,7 +5,7 @@
 
 # change 'tests => 1' to 'tests => last_test_to_print';
 
-use Test::More tests => 46;
+use Test::More tests => 43;
 BEGIN { use_ok('WebService::MusicBrainz::Release') };
 
 #########################

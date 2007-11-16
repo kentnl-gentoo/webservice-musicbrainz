@@ -1,4 +1,4 @@
-package WebService::MusicBrainz::Response::Artist;
+package WebService::MusicBrainz::Response::Label;
 
 use strict;
 use base 'Class::Accessor';
@@ -7,7 +7,7 @@ our $VERSION = '0.12';
 
 =head1 NAME
 
-WebService::MusicBrainz::Response::Artist
+WebService::MusicBrainz::Response::Label
 
 =head1 SYNOPSIS
 
@@ -25,7 +25,11 @@ All the methods listed below are accessor methods.  They can take a scalar argum
 
 =head2 sort_name()
 
+=head2 label_code()
+
 =head2 disambiguation()
+
+=head2 country()
 
 =head2 life_span_begin()
 
@@ -37,11 +41,13 @@ All the methods listed below are accessor methods.  They can take a scalar argum
 
 =head2 relation_list()
 
+=head2 tag_list()
+
 =head2 score()
 
 =cut
 
-__PACKAGE__->mk_accessors(qw/id type name sort_name disambiguation life_span_begin life_span_end alias_list release_list relation_list score/);
+__PACKAGE__->mk_accessors(qw/id type name sort_name label_code disambiguation country life_span_begin life_span_end alias_list release_list relation_list tag_list score/);
 
 =head1 AUTHOR
 

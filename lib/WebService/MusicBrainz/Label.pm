@@ -1,4 +1,4 @@
-package WebService::MusicBrainz::Artist;
+package WebService::MusicBrainz::Label;
 
 use strict;
 use WebService::MusicBrainz::Query;
@@ -7,21 +7,21 @@ our $VERSION = '0.12';
 
 =head1 NAME
 
-WebService::MusicBrainz::Artist
+WebService::MusicBrainz::Label
 
 =head1 SYNOPSIS
 
-    use WebService::MusicBrainz::Artist;
+    use WebService::MusicBrainz::Label;
 
-    my $ws = WebService::MusicBrainz::Artist->new();
+    my $ws = WebService::MusicBrainz::Label->new();
 
-    my $response = $ws->search({ NAME => 'white lion' });
+    my $response = $ws->search({ NAME => 'warner music' });
 
-    my $artist = $response->artist(); # get first in list
+    my $label = $response->label(); # get first in list
 
-    print $artist->name(), " ", $artist->life_span_begin(), "-", $artist->life_span_end(), "\n";
+    print $label->name(), " ", $artist->type(), "\n";
 
-    # OUTPUT: White Lion 1983-1991
+    # OUTPUT: Warner Music Australia Distributor
 
 =head1 DESCRIPTION
 
@@ -31,9 +31,9 @@ This module is used to query an artist from the MusicBrainz web service.
 
 =head2 new()
 
-This method is the constructor and it will make a call for initialization.  This method will take an optional HOST parameter to specify a mirrored server.  The default is "musicbrainz.org".  
+This method is the constructor and it will make a call for initialization.
 
-my $ws = WebService::MusicBrainz::Artist->new(HOST => 'de.musicbrainz.org');
+my $ws = WebService::MusicBrainz::Label->new();
 
 =cut
 
@@ -54,7 +54,7 @@ sub _init {
    my $q = WebService::MusicBrainz::Query->new(@_);
 
    $q->set_url_params(qw/mbid name limit offset/);
-   $q->set_inc_params(qw/aliases artist-rels release-rels track-rels url-rels sa- va-/);
+   $q->set_inc_params(qw/aliases artist-rels label-rels release-rels track-rels url-rels/);
 
    $self->{_query} = $q;
 }
@@ -76,7 +76,7 @@ sub query {
 This method will perform the search of the MusicBrainz database through their web service schema and return a
 response object.
 
-    my $ws = WebService::MusicBrainz::Artist->new();
+    my $ws = WebService::MusicBrainz::Label->new();
     
     my $response = $ws->search({ MBID => 'd15721d8-56b4-453d-b506-fc915b14cba2' });
     my $response = $ws->search({ NAME => 'throwing muses' });
@@ -94,7 +94,7 @@ sub search {
    my $self = shift;
    my $params = shift;
 
-   my $response = $self->query()->get('artist', $params);    
+   my $response = $self->query()->get('label', $params);    
 
    return $response;
 }

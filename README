@@ -1,4 +1,4 @@
-WebService-MusicBrainz version 0.10
+WebService-MusicBrainz version 0.12
 ===================================
 
 This module will search the MusicBrainz database through their web service and return objects with the found data.
