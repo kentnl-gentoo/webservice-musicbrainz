@@ -5,7 +5,7 @@
 
 # change 'tests => 1' to 'tests => last_test_to_print';
 
-use Test::More tests => 43;
+use Test::More tests => 47;
 BEGIN { use_ok('WebService::MusicBrainz::Release') };
 
 #########################
@@ -71,7 +71,8 @@ foreach my $_release (@{ $search_artist->release_list()->releases() }) {
         my $_events = $_release->release_event_list()->events();
 
         foreach my $_event (@{ $_events }) {
-           ok( $_event->date() =~ m/US 1996/);
+           ok( $_event->date() eq "1996" );
+           ok( $_event->country() eq "US" );
            last;
         }
     }

@@ -52,3 +52,6 @@ Revision history for Perl extension WebService::MusicBrainz.
 	- More compliant with 1.2 MMD Schema
 	- Added "label" support and test cases
 	- Fixed test case count in Release.t
+
+0.13 Sun Dec 2 2007
+	- Fixed failing tests in Release.t
