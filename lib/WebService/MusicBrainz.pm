@@ -2,7 +2,7 @@ package WebService::MusicBrainz;
 
 use strict;
 
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 
 =head1 NAME
 

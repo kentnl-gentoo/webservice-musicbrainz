@@ -9,6 +9,7 @@ my $build = Module::Build->new
                   'XML::LibXML'   => '1.63',
                   'LWP::UserAgent' => '2.0',
                   'Class::Accessor' => '0.30',
+                  'URI' => '1.35',
                  },
      create_makefile_pl => 'traditional',
      dist_author => 'Bob Faist <bob.faist@gmail.com>',
