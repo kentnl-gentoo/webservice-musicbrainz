@@ -61,3 +61,6 @@ Revision history for Perl extension WebService::MusicBrainz.
 
 0.15 Mon Dec 3 2007
 	- Added "URI" to required modules in Build.PL
+
+0.16 Wed Dec 5 2007
+	- Updated t/Release.t
