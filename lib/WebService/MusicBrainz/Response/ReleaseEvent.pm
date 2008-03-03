@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Response::ReleaseEvent;
 use strict;
 use base 'Class::Accessor';
 
-our $VERSION = '0.16';
+our $VERSION = '0.17';
 
 =head1 NAME
 
@@ -23,7 +23,7 @@ All the methods listed below are accessor methods.  They can take a scalar argum
 
 =cut
 
-__PACKAGE__->mk_accessors(qw/date country/);
+__PACKAGE__->mk_accessors(qw/date country label catno barcode format/);
 
 =head1 AUTHOR
 

@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Response;
 use strict;
 use XML::LibXML;
 
-our $VERSION = '0.16';
+our $VERSION = '0.17';
 
 =head1 NAME
 
@@ -181,7 +181,7 @@ sub artist {
 
    my $metadata = $self->{_metadata_cache};
 
-   my $artist = $metadata->artist_list() ? shift @{ $metadata->artist_list()->artists() } : $metadata->artist();
+   my $artist = $metadata->artist_list() ? $metadata->artist_list()->artists()->[0] : $metadata->artist();
 
    return $artist;
 }
@@ -197,7 +197,7 @@ sub release {
 
    my $metadata = $self->{_metadata_cache};
 
-   my $release = $metadata->release_list() ? shift @{ $metadata->release_list()->releases() } : $metadata->release();
+   my $release = $metadata->release_list() ? $metadata->release_list()->releases()->[0] : $metadata->release();
 
    return $release;
 }
@@ -213,7 +213,7 @@ sub track {
 
    my $metadata = $self->{_metadata_cache};
 
-   my $track = $metadata->track_list() ? shift @{ $metadata->track_list()->tracks() } : $metadata->track();
+   my $track = $metadata->track_list() ? $metadata->track_list()->tracks()->[0] : $metadata->track();
 
    return $track;
 }
@@ -229,7 +229,7 @@ sub label {
 
    my $metadata = $self->{_metadata_cache};
 
-   my $label = $metadata->label_list() ? shift @{ $metadata->label_list()->labels() } : $metadata->label();
+   my $label = $metadata->label_list() ? $metadata->label_list()->labels()->[0] : $metadata->label();
 
    return $label;
 }
@@ -623,6 +623,9 @@ sub _create_event {
 
    $event->date( $xEvent->getAttribute('date') ) if $xEvent->getAttribute('date');
    $event->country( $xEvent->getAttribute('country') ) if $xEvent->getAttribute('country');
+   $event->label( $xEvent->getAttribute('label') ) if $xEvent->getAttribute('label');
+   $event->catno( $xEvent->getAttribute('catno') ) if $xEvent->getAttribute('catno');
+   $event->barcode( $xEvent->getAttribute('barcode') ) if $xEvent->getAttribute('barcode');
 
    return $event;
 }

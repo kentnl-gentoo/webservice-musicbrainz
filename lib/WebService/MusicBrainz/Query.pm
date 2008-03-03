@@ -3,9 +3,10 @@ package WebService::MusicBrainz::Query;
 use strict;
 use LWP::UserAgent;
 use URI;
+use URI::Escape;
 use WebService::MusicBrainz::Response;
 
-our $VERSION = '0.16';
+our $VERSION = '0.17';
 
 =head1 NAME
 
@@ -105,7 +106,7 @@ sub _url {
       $url .= '&' . lc($key) . '=' . $params->{$key} unless lc($key) eq "mbid";
    }
       
-   # print "URL: $url\n";
+   # warn "URL: $url\n";
 
    return $url;
 }
@@ -136,7 +137,7 @@ sub get {
        return $r;
    }
 
-   die "URL (", $url, ") Request Failed : ", $response->message(), "\n";
+   die "URL (", $url, ") Request Failed - Code: ", $response->code(), " Error: ", $response->message(), "\n";
 }
 
 sub _validate_params {
@@ -146,11 +147,15 @@ sub _validate_params {
    foreach my $key (sort keys %{ $params }) {
       my $valid = 0;
 
-      # replace all whitespace with '+' characters
-      $params->{$key} =~ s/\s+/+/g;
+      my @new_terms;
+      foreach my $term (split /\s/, $params->{$key}) {
+          push @new_terms, URI::Escape::uri_escape($term);
+      }
+
+      $params->{$key} = join '+', @new_terms;
 
       if(lc($key) eq "inc") {
-	  foreach my $iparam (split /[\s,]/, $params->{INC}) {
+         foreach my $iparam (split /[\s,]/, $params->{INC}) {
               foreach my $vparam (@{ $self->{_valid_inc_params} }) {
                   if((lc($iparam) eq lc($vparam)) || ($iparam =~ m/^$vparam/)) {
                       $valid = 1;

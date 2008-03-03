@@ -64,3 +64,10 @@ Revision history for Perl extension WebService::MusicBrainz.
 
 0.16 Wed Dec 5 2007
 	- Updated t/Release.t
+
+0.17 Sat Mar 2 2008
+	- Added URI escaping to URL (Edward Allen)
+	- Added support for label, catno, and barcode in realease events
+	- Changed how first object returned from collection (was shift, now ->[0])
+	- Added delays in test scripts to help not exceed webservice request threshold
+	- Updated test cases

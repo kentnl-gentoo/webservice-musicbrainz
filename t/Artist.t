@@ -5,13 +5,15 @@
 
 # change 'tests => 1' to 'tests => last_test_to_print';
 
-use Test::More tests => 58;
+use Test::More tests => 60;
 BEGIN { use_ok('WebService::MusicBrainz::Artist') };
 
 #########################
 
 # Insert your test code below, the Test::More module is use()ed here so read
 # its man page ( perldoc Test::More ) for help writing this test script.
+
+my $sleep_duration = 2;
 
 my $ws = WebService::MusicBrainz::Artist->new();
 ok( $ws, 'create WebService::MusicBrainz::Artist object' );
@@ -51,6 +53,8 @@ my $search_name2 = $ws->search({ NAME => 'Van Halen' });
 my $artist_name2 = $search_name2->artist();
 ok( $artist_name2->score() =~ m/\d+/, 'get first artist score of 100' );
 
+sleep($sleep_duration);
+
 ####  TEST ARTIST NAME SEARCH ###############################
 
 ####  TEST ARTIST NAME LIMIT SEARCH ###############################
@@ -81,6 +85,8 @@ my $artist_alias_list = $artist_inc_aliases->alias_list();
 ok( $artist_alias_list, 'get artist alias list' );
 
 ok( scalar($artist_alias_list->aliases()) > 3, 'check size of artist alias list' );
+
+sleep($sleep_duration);
 
 ####  TEST ARTIST MBID ALIASES SEARCH ###############################
 
@@ -117,6 +123,8 @@ foreach my $relation (@{ $artist_inc_relation_list->relations() }) {
 
 ####  TEST ARTIST MBID RELEASE RELATIONS SEARCH ###############################
 
+sleep($sleep_duration);
+
 my $search_inc_release_rels = $ws->search({ MBID => '65f4f0c5-ef9e-490c-aee3-909e7ae6b2ab', INC => 'release-rels' });
 ok( $search_inc_release_rels, 'get INC release_rels search response object' );
 
@@ -129,6 +137,8 @@ ok( $artist_inc_release_relation_list, 'get artist relation list' );
 ok( scalar($artist_inc_release_relation_list->relations()) > 3, 'check size of artist relation list' );
 
 ####  TEST ARTIST MBID RELEASE RELATIONS SEARCH ###############################
+
+sleep($sleep_duration);
 
 my $search_inc_track_rels = $ws->search({ MBID => '65f4f0c5-ef9e-490c-aee3-909e7ae6b2ab', INC => 'track-rels' });
 ok( $search_inc_track_rels, 'get INC track_rels search response object' );
@@ -147,6 +157,8 @@ foreach my $relation ( @{ $search_inc_url_rels_artist_relation_list->relations()
         ok( $relation->target() =~ m/wikipedia/, 'check INC url_rels relation url' );
      }
 }
+
+sleep($sleep_duration);
 
 #### TEST ARTIST MBID SINGLE ARTIST RELEASE SEARCH ########################################
 
@@ -167,6 +179,8 @@ foreach my $release (@{ $sa_album_artist_release_list->releases() }) {
    }
 }
 
+sleep($sleep_duration);
+
 #### TEST ARTIST MBID VARIOUS ARTIST RELEASE SEARCH ############################
 my $va_album_vartist_search = $ws->search({ MBID => 'c80f38a6-9980-485d-997c-5c1a9cbd0d64', INC => 'va-Soundtrack' });
 ok( $va_album_vartist_search, 'check INC va_soundtrack search object' );
@@ -183,6 +197,8 @@ foreach my $release (@{ $va_album_vartist_search_artist_release_list->releases()
     }
 }
 
+sleep($sleep_duration);
+
 my $offset_artist_search = $ws->search({ NAME => 'beatles', OFFSET => 3 });
 
 ok( $offset_artist_search );
@@ -190,10 +206,16 @@ ok( $offset_artist_search );
 my $offset_artist_list = $offset_artist_search->artist_list();
 
 ok( $offset_artist_list->offset() eq "3" );
-ok( $offset_artist_list->count() eq "9" );
+ok( $offset_artist_list->count() eq "8" );
 
 foreach my $artist (@{ $offset_artist_list->artists() }) {
-   if($artist->id() eq "1e366399-4cf7-427d-94bc-4736ec3959ff") {
-       ok($artist->name() eq "The Exotic Beatles");
+   if($artist->id() eq "4c3d0136-9235-4c50-b136-be49d17163df") {
+       ok($artist->name() eq "The Black Beatles");
    }
 }
+
+my $utf8_artist_test = $ws->search({ NAME => 'João Gilberto' });
+ok( $utf8_artist_test );
+
+my $utf8_artist_list = $utf8_artist_test->artist_list();
+ok( $utf8_artist_list );
