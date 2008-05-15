@@ -71,3 +71,6 @@ Revision history for Perl extension WebService::MusicBrainz.
 	- Changed how first object returned from collection (was shift, now ->[0])
 	- Added delays in test scripts to help not exceed webservice request threshold
 	- Updated test cases
+
+0.18 Wed May 14th 2008
+	- Update test in Release.t (Stefan)

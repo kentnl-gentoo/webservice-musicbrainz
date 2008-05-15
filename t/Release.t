@@ -40,7 +40,7 @@ ok( $title_first_release_event_list, "9 - title search release event list" );
 
 my $title_first_release_disc_list = $title_first_release->disc_list();
 ok( $title_first_release_disc_list, "10 - title search disc list" );
-ok( $title_first_release_disc_list->count() eq '8', "11 - title search release disc count");
+ok( $title_first_release_disc_list->count() eq '9', "11 - title search release disc count");
 
 my $title_first_release_track_list = $title_first_release->track_list();
 ok( $title_first_release_track_list, "12 - title search track list" );
