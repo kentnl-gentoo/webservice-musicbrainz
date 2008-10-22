@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Response::ReleaseEvent;
 use strict;
 use base 'Class::Accessor';
 
-our $VERSION = '0.18';
+our $VERSION = '0.19';
 
 =head1 NAME
 

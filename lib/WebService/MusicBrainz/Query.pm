@@ -6,7 +6,7 @@ use URI;
 use URI::Escape;
 use WebService::MusicBrainz::Response;
 
-our $VERSION = '0.18';
+our $VERSION = '0.19';
 
 =head1 NAME
 

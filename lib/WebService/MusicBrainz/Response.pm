@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Response;
 use strict;
 use XML::LibXML;
 
-our $VERSION = '0.18';
+our $VERSION = '0.19';
 
 =head1 NAME
 
@@ -575,7 +575,7 @@ sub _create_relation {
    $relation->type( $xRelation->getAttribute('type') ) if $xRelation->getAttribute('type');
    $relation->target( $xRelation->getAttribute('target') ) if $xRelation->getAttribute('target');
    $relation->direction( $xRelation->getAttribute('direction') ) if $xRelation->getAttribute('direction');
-   $relation->getAttributeributes( $xRelation->getAttribute('attributes') ) if $xRelation->getAttribute('attributes');
+   $relation->attributes( $xRelation->getAttribute('attributes') ) if $xRelation->getAttribute('attributes');
    $relation->begin( $xRelation->getAttribute('begin') ) if $xRelation->getAttribute('begin');
    $relation->end( $xRelation->getAttribute('end') ) if $xRelation->getAttribute('end');
    $relation->score( $xRelation->getAttribute('ext:score') ) if $xRelation->getAttribute('ext:score');
