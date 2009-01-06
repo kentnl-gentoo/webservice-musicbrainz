@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Response;
 use strict;
 use XML::LibXML;
 
-our $VERSION = '0.19';
+our $VERSION = '0.20';
 
 =head1 NAME
 
@@ -749,7 +749,7 @@ sub _create_puid_list {
    my @puids;
 
    foreach my $xPuid ($xpc->findnodes('mmd:puid', $xPuidList)) {
-       my $puid = _create_puid( $xPuid );
+       my $puid = $self->_create_puid( $xPuid );
        push @puids, $puid;
    }
 

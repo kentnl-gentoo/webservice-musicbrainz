@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Response::Puid;
 use strict;
 use base 'Class::Accessor';
 
-our $VERSION = '0.19';
+our $VERSION = '0.20';
 
 =head1 NAME
 
@@ -17,11 +17,11 @@ WebService::MusicBrainz::Response::Puid
 
 All the methods listed below are accessor methods.  They can take a scalar argument to set the state of the object or without and argument, they will return that state if it is available.
 
-=head2 uuid()
+=head2 id()
 
 =cut
 
-__PACKAGE__->mk_accessors(qw/uuid/);
+__PACKAGE__->mk_accessors(qw/id/);
 
 =head1 AUTHOR
 

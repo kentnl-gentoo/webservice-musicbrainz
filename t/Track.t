@@ -5,7 +5,7 @@
 
 # change 'tests => 1' to 'tests => last_test_to_print';
 
-use Test::More tests => 17;
+use Test::More tests => 19;
 BEGIN { use_ok('WebService::MusicBrainz::Track') };
 
 #########################
@@ -63,8 +63,14 @@ ok( $search_inc_releases );
 sleep($sleep_duration);
 
 # TODO: Valid option??
-# my $search_inc_puids = $ws->search({ MBID => 'bd08eddf-b811-4653-b56b-892292c291bc', INC => 'puids' });
-# ok( $search_inc_puids );
+my $search_inc_puids = $ws->search({ MBID => 'bd08eddf-b811-4653-b56b-892292c291bc', INC => 'puids' });
+ok( $search_inc_puids );
+my $puid_list = $search_inc_puids->track()->puid_list();
+foreach my $puid (@{ $puid_list->puids() }) {
+    if($puid->id() eq "316dd794-655f-c2a2-1ed9-6cf614b02f00") {
+        ok($puid);
+    }
+}
 
 my $search_inc_artist_rels = $ws->search({ MBID => 'bd08eddf-b811-4653-b56b-892292c291bc', INC => 'artist-rels' });
 ok( $search_inc_artist_rels );

@@ -77,3 +77,10 @@ Revision history for Perl extension WebService::MusicBrainz.
 
 0.19 Tue Oct 21st 2008
 	- RT bug 39945 - Chris Key
+
+0.20 Mon Jan 5th 2009
+	- RT Bug 40597 - Slaven
+	    - Updated Build.PL perl version
+	- RT Bug 42169 - pbryan
+	    - Fixed PUID object creation
+            - Added test cases for PUID objects to Track.t
