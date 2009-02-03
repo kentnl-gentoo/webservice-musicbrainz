@@ -6,7 +6,7 @@ use URI;
 use URI::Escape;
 use WebService::MusicBrainz::Response;
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 
 =head1 NAME
 
@@ -148,7 +148,7 @@ sub _validate_params {
       my $valid = 0;
 
       my @new_terms;
-      foreach my $term (split /\s/, $params->{$key}) {
+      foreach my $term (split /[\s\+,]/, $params->{$key}) {
           push @new_terms, URI::Escape::uri_escape($term);
       }
 
