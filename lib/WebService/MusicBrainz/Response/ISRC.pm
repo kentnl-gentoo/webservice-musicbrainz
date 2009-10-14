@@ -1,4 +1,4 @@
-package WebService::MusicBrainz::Response::Puid;
+package WebService::MusicBrainz::Response::ISRC;
 
 use strict;
 use base 'Class::Accessor';
@@ -7,7 +7,7 @@ our $VERSION = '0.90';
 
 =head1 NAME
 
-WebService::MusicBrainz::Response::Puid
+WebService::MusicBrainz::Response::ISRC
 
 =head1 SYNOPSIS
 
@@ -19,9 +19,11 @@ All the methods listed below are accessor methods.  They can take a scalar argum
 
 =head2 id()
 
+=head2 name()
+
 =cut
 
-__PACKAGE__->mk_accessors(qw/id/);
+__PACKAGE__->mk_accessors(qw/id name/);
 
 =head1 AUTHOR
 

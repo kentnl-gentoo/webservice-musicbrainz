@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Response::ReleaseEvent;
 use strict;
 use base 'Class::Accessor';
 
-our $VERSION = '0.22';
+our $VERSION = '0.90';
 
 =head1 NAME
 
@@ -21,9 +21,17 @@ All the methods listed below are accessor methods.  They can take a scalar argum
 
 =head2 country()
 
+=head2 label()
+
+=head2 catalog_number()
+
+=head2 barcode()
+ 
+=head2 format()
+
 =cut
 
-__PACKAGE__->mk_accessors(qw/date country label catno barcode format/);
+__PACKAGE__->mk_accessors(qw/date country label catalog_number barcode format/);
 
 =head1 AUTHOR
 
@@ -35,7 +43,7 @@ __PACKAGE__->mk_accessors(qw/date country label catno barcode format/);
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2006-2007 by Bob Faist
+Copyright 2006-2009 by Bob Faist
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

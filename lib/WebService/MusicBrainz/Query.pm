@@ -6,7 +6,7 @@ use URI;
 use URI::Escape;
 use WebService::MusicBrainz::Response;
 
-our $VERSION = '0.22';
+our $VERSION = '0.90';
 
 =head1 NAME
 
@@ -149,7 +149,7 @@ sub _validate_params {
 
       my @new_terms;
       foreach my $term (split /[\s\+,]/, $params->{$key}) {
-          push @new_terms, URI::Escape::uri_escape($term);
+          push @new_terms, URI::Escape::uri_escape_utf8($term);
       }
 
       $params->{$key} = join '+', @new_terms;
@@ -190,7 +190,7 @@ sub _validate_params {
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2006-2007 by Bob Faist
+Copyright 2006-2009 by Bob Faist
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself. 

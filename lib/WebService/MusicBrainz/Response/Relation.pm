@@ -3,7 +3,7 @@ package WebService::MusicBrainz::Response::Relation;
 use strict;
 use base 'Class::Accessor';
 
-our $VERSION = '0.22';
+our $VERSION = '0.90';
 
 =head1 NAME
 
@@ -39,7 +39,7 @@ All the methods listed below are accessor methods.  They can take a scalar argum
 
 =cut
 
-__PACKAGE__->mk_accessors(qw/type target direction attributes begin end artist release track score/);
+__PACKAGE__->mk_accessors(qw/type target direction attributes begin end artist release track label score/);
 
 =head1 AUTHOR
 
@@ -51,7 +51,7 @@ __PACKAGE__->mk_accessors(qw/type target direction attributes begin end artist r
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2006-2007 by Bob Faist
+Copyright 2006-2009 by Bob Faist
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

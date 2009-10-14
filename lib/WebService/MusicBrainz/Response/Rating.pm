@@ -1,4 +1,4 @@
-package WebService::MusicBrainz::Response::Puid;
+package WebService::MusicBrainz::Response::Rating;
 
 use strict;
 use base 'Class::Accessor';
@@ -7,7 +7,7 @@ our $VERSION = '0.90';
 
 =head1 NAME
 
-WebService::MusicBrainz::Response::Puid
+WebService::MusicBrainz::Response::Rating
 
 =head1 SYNOPSIS
 
@@ -17,11 +17,13 @@ WebService::MusicBrainz::Response::Puid
 
 All the methods listed below are accessor methods.  They can take a scalar argument to set the state of the object or without and argument, they will return that state if it is available.
 
-=head2 id()
+=head2 votes_count()
+
+=head2 value()
 
 =cut
 
-__PACKAGE__->mk_accessors(qw/id/);
+__PACKAGE__->mk_accessors(qw/votes_count value/);
 
 =head1 AUTHOR
 

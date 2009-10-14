@@ -7,7 +7,7 @@
 
 use strict;
 use Test::More;
-BEGIN { use_ok('WebService::MusicBrainz::Label') };
+BEGIN { use_ok('WebService::MusicBrainz::ReleaseGroup') };
 
 #########################
 
@@ -16,15 +16,14 @@ BEGIN { use_ok('WebService::MusicBrainz::Label') };
 
 my $sleep_duration = 2;
 
-my $ws = WebService::MusicBrainz::Label->new();
-ok( $ws, 'create WebService::MusicBrainz::Label object' );
+my $ws = WebService::MusicBrainz::ReleaseGroup->new();
+ok( $ws, 'create WebService::MusicBrainz::ReleaseGroup object' );
 
-my $wsde = WebService::MusicBrainz::Label->new(HOST => 'de.musicbrainz.org');
+my $wsde = WebService::MusicBrainz::ReleaseGroup->new(HOST => 'de.musicbrainz.org');
 my $wsde_query = $wsde->query();
-ok( $wsde_query->{_baseurl} =~ m/de\.musicbrainz\.org/, 'create WebService::MusicBrainz::Label object/altername host' );
+ok( $wsde_query->{_baseurl} =~ m/de\.musicbrainz\.org/, 'create WebService::MusicBrainz::ReleaseGroup object/altername host' );
+
 
 sleep($sleep_duration);
-
-
 
 done_testing();
