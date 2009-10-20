@@ -110,4 +110,8 @@ Revision history for Perl extension WebService::MusicBrainz.
 		- Fixed UTF8 support
 	- Made compliant with MMD 1.4 schema
 	- Rewrote test cases (still more to do)
-	- Added support for direct Lucene queries (Dave Hodgkinson)
+	- Added support for direct Lucene queries (suggest: Dave Hodgkinson)
+
+0.91 Mon Oct 19th 2009
+	- RT Bug 50581 - Andreas Koenig
+		- Added prereq for Test::More 0.88
