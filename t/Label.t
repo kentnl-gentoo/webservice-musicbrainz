@@ -1,30 +1,19 @@
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl WebService-MusicBrainz.t'
-
-#########################
-
-# change 'tests => 1' to 'tests => last_test_to_print';
-
 use strict;
 use Test::More;
-BEGIN { use_ok('WebService::MusicBrainz::Label') };
 
-#########################
+use WebService::MusicBrainz;
+use Data::Dumper;
 
-# Insert your test code below, the Test::More module is use()ed here so read
-# its man page ( perldoc Test::More ) for help writing this test script.
+my $ws = WebService::MusicBrainz->new();
+ok($ws);
 
-my $sleep_duration = 2;
+# JSON TESTS
+my $s1_res = $ws->search(label => { label => 'original', country => 'US' });
+ok($s1_res->{count} > 5);
+sleep(1);
 
-my $ws = WebService::MusicBrainz::Label->new();
-ok( $ws, 'create WebService::MusicBrainz::Label object' );
-
-my $wsde = WebService::MusicBrainz::Label->new(HOST => 'de.musicbrainz.org');
-my $wsde_query = $wsde->query();
-ok( $wsde_query->{_baseurl} =~ m/de\.musicbrainz\.org/, 'create WebService::MusicBrainz::Label object/altername host' );
-
-sleep($sleep_duration);
-
-
+foreach my $label (@{ $s1_res->{labels} }) {
+    ok($label->{name} =~ m/original/i);
+}
 
 done_testing();
